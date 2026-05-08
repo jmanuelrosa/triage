@@ -36,16 +36,15 @@ Validate the assumptions that could kill the architecture before writing real co
 
 ---
 
-## Phase 1 — Scaffold
+## Phase 1 — Scaffold ✅ 2026-05-08
 
-Only start once Phase 0 passes.
-
-- [ ] Create SwiftPM project at `/Users/jmanuelrosa/Developer/personal/openwith/`
-  Files: `Package.swift`, `Sources/openwith/`, `Resources/Info.plist`, `Tests/`.
-- [ ] Add Yams dependency to `Package.swift`
-- [ ] Write `Resources/Info.plist`: `CFBundleURLTypes` for `http`/`https`, app metadata
-- [ ] `Sources/openwith/main.swift`: bootstrap `NSApplication`, set `.accessory` policy, install AppDelegate
-- [ ] `git init` + initial commit (project skeleton)
+- [x] SwiftPM project at project root (`Package.swift`, `Sources/openwith/`, `Resources/Info.plist`, `Scripts/build.sh`)
+- [x] Yams 5.4.0 pinned via `Package.resolved`
+- [x] `Resources/Info.plist` with all Phase 0 gotchas baked in (no `LSUIElement`, `CFBundleDocumentTypes` for `public.html`/`public.xhtml`/`public.url`)
+- [x] `main.swift` bootstraps `NSApplication` with `.accessory` policy
+- [x] `AppDelegate.swift` registers `kAEGetURL` in `applicationWillFinishLaunching`, logs URL + AE sender PID (Phase 0 behavior, real project structure)
+- [x] `Scripts/build.sh` runs `swift build` then assembles `.app` bundle with ad-hoc codesign
+- [x] `git init -b main` + initial commit + Yams pin commit
 
 ---
 
@@ -53,8 +52,8 @@ Only start once Phase 0 passes.
 
 Build inside-out: pure logic first (testable), then I/O, then UI.
 
-- [ ] `RuleMatcher.swift` — host glob + optional source_app match, first-match-wins. **Pure function, no macOS APIs.**
-- [ ] `Tests/RuleMatcherTests.swift` — table-driven tests covering glob edge cases, source-app match, no-match
+- [ ] `RuleMatcher.swift` — host glob + **path glob** + optional source_app match, first-match-wins. **Pure function, no macOS APIs.**
+- [ ] `Tests/RuleMatcherTests.swift` — table-driven tests covering host/path glob edge cases, source-app match, no-match
 - [ ] `Config.swift` — YAML decode via Yams, validation, helpful error messages on malformed config
 - [ ] `State.swift` — `state.json` read/write, first-run capture of `LSCopyDefaultHandlerForURLScheme("http")`
 - [ ] `BrowserLauncher.swift` — `open -na <bundle_id> --args [--profile-directory=<profile>] <url>` via `Process`
