@@ -12,3 +12,6 @@ poc/openwith-poc
 
 # Logs
 *.log
+
+# Claude Code project tooling (not part of the app)
+.claude/
