@@ -52,8 +52,8 @@ Validate the assumptions that could kill the architecture before writing real co
 
 Build inside-out: pure logic first (testable), then I/O, then UI.
 
-- [ ] `RuleMatcher.swift` — host glob + **path glob** + optional source_app match, first-match-wins. **Pure function, no macOS APIs.**
-- [ ] `Tests/RuleMatcherTests.swift` — table-driven tests covering host/path glob edge cases, source-app match, no-match
+- [x] `RuleMatcher.swift` ✅ 2026-05-08 — host glob + path glob + source-app (bundle ID or display name), first-match-wins, case-insensitive everywhere. Lives in new `OpenWithCore` library target.
+- [x] `Tests/OpenWithCoreTests/RuleMatcherTests.swift` ✅ 2026-05-08 — 25 swift-testing cases (XCTest needs full Xcode; CLT-only setup uses swift-testing as an explicit SwiftPM dep).
 - [ ] `Config.swift` — YAML decode via Yams, validation, helpful error messages on malformed config
 - [ ] `State.swift` — `state.json` read/write, first-run capture of `LSCopyDefaultHandlerForURLScheme("http")`
 - [ ] `BrowserLauncher.swift` — `open -na <bundle_id> --args [--profile-directory=<profile>] <url>` via `Process`
