@@ -1,0 +1,14 @@
+# SwiftPM
+.build/
+*.xcodeproj/
+
+# macOS
+.DS_Store
+
+# Built app bundle (rebuild via Scripts/build.sh)
+openwith.app/
+poc/openwith-poc.app/
+poc/openwith-poc
+
+# Logs
+*.log
