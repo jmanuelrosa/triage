@@ -57,6 +57,10 @@ Build inside-out: pure logic first (testable), then I/O, then UI.
 - [x] `Config.swift` ✅ 2026-05-08 — Yams decode, validation (every rule must reference a declared browser), `Config.parse(yaml:)` + `Config.load(from:)`, structured `ConfigError` (Equatable). 11 tests in `ConfigTests`.
 - [x] `ChromeProfileResolver.swift` ✅ 2026-05-08 — parses Chrome's `Local State` JSON; maps friendly profile names → directory names. Passthrough for unknown values (so `"Profile 4"` and `"Default"` work as escape hatches). Duplicate display names handled deterministically (first-by-directory-key). 12 tests in `ChromeProfileResolverTests`.
 - [x] `State.swift` ✅ 2026-05-08 — `state.json` Codable (snake_case fields, ISO-8601 dates), `State.load`/`save` with atomic write + parent-directory creation, `defaultURL = ~/.config/openwith/state.json`. 8 tests in `StateTests`.
+- [x] `BrowserLauncher.swift` ✅ 2026-05-08 — pure argv builder for `/usr/bin/open`, with/without `--profile-directory`. 8 tests.
+- [x] `URLHandler.swift` ✅ 2026-05-08 — full pipeline: kAEGetURL → MatchContext → RuleMatcher → browser resolution → BrowserLauncher → `Process.run`. Loop protection if a rule/state points back at us. Safari as ultimate fallback when state.json is missing. Validated end-to-end with Slack → GitHub globex URL → Helium.
+- [x] `AppDelegate.swift` slimmed to AE handler bootstrap + delegation to `URLHandler`. Status bar / menu still pending (next slice).
+- [x] `config.example.yaml` ✅ 2026-05-08 — committed plan example as a starting template.
 - [ ] `State.swift` — `state.json` read/write, first-run capture of `LSCopyDefaultHandlerForURLScheme("http")`
 - [ ] `BrowserLauncher.swift` — `open -na <bundle_id> --args [--profile-directory=<profile>] <url>` via `Process`
 - [ ] `URLHandler.swift` — register `kAEGetURL` handler, capture source app, resolve via RuleMatcher, launch via BrowserLauncher

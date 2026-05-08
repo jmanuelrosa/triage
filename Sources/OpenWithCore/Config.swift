@@ -76,4 +76,10 @@ public extension Config {
             )
         }
     }
+
+    /// `~/.config/openwith/config.yaml`.
+    static var defaultURL: URL {
+        URL(fileURLWithPath: NSHomeDirectory())
+            .appendingPathComponent(".config/openwith/config.yaml")
+    }
 }

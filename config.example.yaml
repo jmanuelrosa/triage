@@ -1,0 +1,48 @@
+# openwith — example config
+#
+# Copy to ~/.config/openwith/config.yaml:
+#   mkdir -p ~/.config/openwith && cp config.example.yaml ~/.config/openwith/config.yaml
+#
+# Reload after edits via the menu bar (or kill & relaunch openwith).
+# Match semantics:
+#   - First matching rule wins, top-down.
+#   - host / path / source_app are independently optional. Missing field = match anything.
+#   - host and path support `*` glob (case-insensitive, anchored).
+#   - source_app matches against either the bundle ID or the app's display name.
+# No `default_browser` field — the silent fallback is whatever the system default
+# browser was at openwith's first launch (captured to ~/.config/openwith/state.json).
+
+browsers:
+  helium:
+    bundle_id: net.imput.helium                # work / Acme
+  chrome_personal:
+    bundle_id: com.google.Chrome
+    profile: "Jose Manuel"                     # → Default
+  chrome_dev:
+    bundle_id: com.google.Chrome
+    profile: "Jose Manuel [Dev]"               # → Profile 4
+  chrome_3bits:
+    bundle_id: com.google.Chrome
+    profile: "3bitslost"                       # → Profile 8
+
+rules:
+  # Work — anything Acme-related goes to Helium regardless of source
+  - host: "*.acme.io"
+    browser: helium
+  - host: "*.globex.com"
+    browser: helium
+  - host: gitlab.com
+    path: "/acme/*"
+    browser: helium
+
+  # GitHub orgs — same host, different routing by path
+  - host: github.com
+    path: "/globex/*"
+    browser: helium
+  - host: github.com
+    path: "/3bitslost-team/*"
+    browser: chrome_3bits
+
+  # Source-app shortcut: work Slack → work browser, regardless of URL
+  - source_app: Slack
+    browser: helium
