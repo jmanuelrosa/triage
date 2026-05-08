@@ -54,7 +54,7 @@ Build inside-out: pure logic first (testable), then I/O, then UI.
 
 - [x] `RuleMatcher.swift` ✅ 2026-05-08 — host glob + path glob + source-app (bundle ID or display name), first-match-wins, case-insensitive everywhere. Lives in new `OpenWithCore` library target.
 - [x] `Tests/OpenWithCoreTests/RuleMatcherTests.swift` ✅ 2026-05-08 — 25 swift-testing cases (XCTest needs full Xcode; CLT-only setup uses swift-testing as an explicit SwiftPM dep).
-- [ ] `Config.swift` — YAML decode via Yams, validation, helpful error messages on malformed config
+- [x] `Config.swift` ✅ 2026-05-08 — Yams decode, validation (every rule must reference a declared browser), `Config.parse(yaml:)` + `Config.load(from:)`, structured `ConfigError` (Equatable). 11 tests in `ConfigTests`.
 - [ ] `State.swift` — `state.json` read/write, first-run capture of `LSCopyDefaultHandlerForURLScheme("http")`
 - [ ] `BrowserLauncher.swift` — `open -na <bundle_id> --args [--profile-directory=<profile>] <url>` via `Process`
 - [ ] `URLHandler.swift` — register `kAEGetURL` handler, capture source app, resolve via RuleMatcher, launch via BrowserLauncher
