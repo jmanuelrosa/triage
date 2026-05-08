@@ -1,9 +1,11 @@
 import AppKit
 import OSLog
 
-private let log = Logger(subsystem: "com.jmrosamoncayo.openwith", category: "url-handler")
+private let log = Logger(subsystem: "com.jmrosamoncayo.openwith", category: "app")
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
+    private let urlHandler = URLHandler()
+
     // Register here, NOT in applicationDidFinishLaunching: when macOS cold-launches
     // us in response to a URL click, the kAEGetURL event is delivered between
     // willFinishLaunching and didFinishLaunching. Registering in `Did` drops the
@@ -25,9 +27,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         _ event: NSAppleEventDescriptor,
         withReplyEvent reply: NSAppleEventDescriptor
     ) {
-        let url = event
+        guard let url = event
             .paramDescriptor(forKeyword: AEKeyword(keyDirectObject))?
-            .stringValue ?? "<no url>"
+            .stringValue
+        else {
+            log.error("kAEGetURL had no URL")
+            return
+        }
 
         // 'spid' = keySenderPIDAttr — the PID of the originating process.
         // Resolves to the user-visible source app (Slack, Notion, …) instead
@@ -35,13 +41,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let senderPID = event
             .attributeDescriptor(forKeyword: AEKeyword(0x73706964))?
             .int32Value ?? 0
-        let sender = senderPID != 0
-            ? NSRunningApplication(processIdentifier: senderPID)
-            : nil
 
-        log.info("""
-        url=\(url, privacy: .public)
-          sender=\(sender?.localizedName ?? "?", privacy: .public) [\(sender?.bundleIdentifier ?? "?", privacy: .public)] pid=\(senderPID, privacy: .public)
-        """)
+        urlHandler.handle(url: url, senderPID: senderPID)
     }
 }
