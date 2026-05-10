@@ -34,7 +34,7 @@ There are several good tools in this space. Triage exists to fill a specific nic
 | Tool                         | Asks before opening?  | Native?            | Chrome profiles? | Cost  | Niche                                                     |
 | ---------------------------- | --------------------- | ------------------ | ---------------- | ----- | --------------------------------------------------------- |
 | **Triage**                   | ❌ No, rules only      | ✅ Swift            | ✅ First-class    | Free  | Silent rule-based routing, YAML-configured                |
-| [Velja][velja]               | ✅ Picker by default   | ✅ Swift            | ⚠️ Limited       | Free  | When you *want* to be asked occasionally                  |
+| [Velja][velja]               | ✅ Picker by default   | ✅ Swift            | ⚠️ Limited       | Freemium (Pro upgrade)  | When you *want* to be asked occasionally — rule routing is a Pro feature |
 | [Browserosaurus][browserosaurus] | ✅ Picker          | ⚠️ Electron         | ❌                | Free  | Picker-first, cross-platform-ish                          |
 | [Finicky][finicky]           | ❌ Rules only          | ✅ Swift + JSCore   | ✅                | Free  | Rule-based, native — but you write rules in JavaScript    |
 | [Choosy][choosy]             | Configurable          | ✅                  | ✅                | $12   | Rule-based, native, GUI-configured, paid                  |
@@ -44,7 +44,7 @@ There are several good tools in this space. Triage exists to fill a specific nic
 [finicky]: https://github.com/johnste/finicky
 [choosy]: https://www.choosyosx.com/
 
-In short: if you want a picker, use Velja or Browserosaurus. If you'd rather write rules in JavaScript, Finicky is excellent. If you'll pay for a polished GUI, use Choosy. If you want a tiny native binary you configure in YAML and never see again, that's Triage.
+In short: if you want a picker, use Browserosaurus (free) or Velja (free with paid Pro). If you'd rather write rules in JavaScript, Finicky is excellent. If you'll pay for a polished GUI, use Choosy. If you want a tiny native binary you configure in YAML and never see again, that's Triage.
 
 ## 🚀 Usage
 
