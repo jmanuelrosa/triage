@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-@testable import OpenWithCore
+@testable import TriageCore
 
 @Suite("ChromeProfileResolver")
 struct ChromeProfileResolverTests {
@@ -156,7 +156,7 @@ struct ChromeProfileResolverTests {
         { "profile": { "info_cache": { "Default": { "name": "Jose Manuel" } } } }
         """
         let tempURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("openwith-localstate-test-\(UUID().uuidString).json")
+            .appendingPathComponent("triage-localstate-test-\(UUID().uuidString).json")
         try json.write(to: tempURL, atomically: true, encoding: .utf8)
         defer { try? FileManager.default.removeItem(at: tempURL) }
 
