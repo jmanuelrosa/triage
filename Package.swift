@@ -2,7 +2,7 @@
 import PackageDescription
 
 let package = Package(
-    name: "openwith",
+    name: "triage",
     platforms: [.macOS(.v13)],
     dependencies: [
         .package(url: "https://github.com/jpsim/Yams.git", from: "5.0.6"),
@@ -12,19 +12,19 @@ let package = Package(
     ],
     targets: [
         .target(
-            name: "OpenWithCore",
+            name: "TriageCore",
             dependencies: [
                 .product(name: "Yams", package: "Yams")
             ]
         ),
         .executableTarget(
-            name: "openwith",
-            dependencies: ["OpenWithCore"]
+            name: "triage",
+            dependencies: ["TriageCore"]
         ),
         .testTarget(
-            name: "OpenWithCoreTests",
+            name: "TriageCoreTests",
             dependencies: [
-                "OpenWithCore",
+                "TriageCore",
                 .product(name: "Testing", package: "swift-testing")
             ]
         )

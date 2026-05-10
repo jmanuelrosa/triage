@@ -1,6 +1,6 @@
 import Foundation
 import Testing
-@testable import OpenWithCore
+@testable import TriageCore
 
 @Suite("Config")
 struct ConfigTests {
@@ -147,7 +147,7 @@ struct ConfigTests {
         rules: []
         """
         let tempURL = FileManager.default.temporaryDirectory
-            .appendingPathComponent("openwith-config-test-\(UUID().uuidString).yaml")
+            .appendingPathComponent("triage-config-test-\(UUID().uuidString).yaml")
         try yaml.write(to: tempURL, atomically: true, encoding: .utf8)
         defer { try? FileManager.default.removeItem(at: tempURL) }
 
@@ -156,7 +156,7 @@ struct ConfigTests {
     }
 
     @Test func load_missingFile_throws() {
-        let bogusURL = URL(fileURLWithPath: "/nonexistent/path/openwith-\(UUID().uuidString).yaml")
+        let bogusURL = URL(fileURLWithPath: "/nonexistent/path/triage-\(UUID().uuidString).yaml")
         #expect(throws: ConfigError.self) {
             try Config.load(from: bogusURL)
         }

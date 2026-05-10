@@ -1,16 +1,16 @@
-# openwith — example config
+# Triage — example config
 #
-# Copy to ~/.config/openwith/config.yaml:
-#   mkdir -p ~/.config/openwith && cp config.example.yaml ~/.config/openwith/config.yaml
+# Copy to ~/.config/triage/config.yaml:
+#   mkdir -p ~/.config/triage && cp config.example.yaml ~/.config/triage/config.yaml
 #
-# Reload after edits via the menu bar (or kill & relaunch openwith).
+# Reload after edits via the menu bar (or kill & relaunch Triage).
 # Match semantics:
 #   - First matching rule wins, top-down.
 #   - host / path / source_app are independently optional. Missing field = match anything.
 #   - host and path support `*` glob (case-insensitive, anchored).
 #   - source_app matches against either the bundle ID or the app's display name.
 # No `default_browser` field — the silent fallback is whatever the system default
-# browser was at openwith's first launch (captured to ~/.config/openwith/state.json).
+# browser was at Triage's first launch (captured to ~/.config/triage/fallback-browser.json).
 
 browsers:
   helium:

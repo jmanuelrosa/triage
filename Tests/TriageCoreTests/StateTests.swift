@@ -1,13 +1,13 @@
 import Foundation
 import Testing
-@testable import OpenWithCore
+@testable import TriageCore
 
 @Suite("State")
 struct StateTests {
 
     private func tempURL(suffix: String = ".json") -> URL {
         FileManager.default.temporaryDirectory
-            .appendingPathComponent("openwith-state-test-\(UUID().uuidString)\(suffix)")
+            .appendingPathComponent("triage-state-test-\(UUID().uuidString)\(suffix)")
     }
 
     // MARK: - Round-trip
@@ -51,9 +51,9 @@ struct StateTests {
 
     @Test func save_createsMissingParentDirectories() throws {
         let baseDir = FileManager.default.temporaryDirectory
-            .appendingPathComponent("openwith-state-mkdir-\(UUID().uuidString)")
+            .appendingPathComponent("triage-state-mkdir-\(UUID().uuidString)")
         let nestedURL = baseDir
-            .appendingPathComponent("a/b/c/state.json")
+            .appendingPathComponent("a/b/c/fallback-browser.json")
         defer { try? FileManager.default.removeItem(at: baseDir) }
 
         let state = State(fallbackBrowserBundleID: "com.apple.Safari")
@@ -78,7 +78,7 @@ struct StateTests {
     // MARK: - Errors
 
     @Test func load_missingFile_throwsIOError() {
-        let bogusURL = URL(fileURLWithPath: "/nonexistent/openwith-\(UUID().uuidString).json")
+        let bogusURL = URL(fileURLWithPath: "/nonexistent/triage-\(UUID().uuidString).json")
         #expect(throws: StateError.self) {
             try State.load(from: bogusURL)
         }
@@ -116,6 +116,6 @@ struct StateTests {
 
     @Test func defaultURL_pointsAtConfigDirectory() {
         let url = State.defaultURL
-        #expect(url.path.hasSuffix("/.config/openwith/state.json"))
+        #expect(url.path.hasSuffix("/.config/triage/fallback-browser.json"))
     }
 }
