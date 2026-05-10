@@ -27,8 +27,8 @@ const rows: Row[] = [
     asks: { value: "Picker by default", tone: "yes" },
     native: { value: "Swift", tone: "yes" },
     profiles: { value: "Limited", tone: "warn" },
-    cost: { value: "Free", tone: "neutral" },
-    niche: "When you want to be asked occasionally",
+    cost: { value: "Freemium (Pro)", tone: "warn" },
+    niche: "Picker-first; rule routing is a Pro feature",
   },
   {
     name: "Browserosaurus",
@@ -81,9 +81,10 @@ const toneClass = (tone?: Cell["tone"]) => {
         Several good tools. Different niches.
       </h2>
       <p class="mt-4 text-[color:var(--color-fg-soft)]">
-        If you want a picker, use Velja or Browserosaurus. If you'd rather write rules in JavaScript,
-        Finicky is excellent. If you'll pay for a polished GUI, use Choosy. If you want a tiny native
-        binary you configure in YAML and never see again — that's Triage.
+        If you want a picker, use Browserosaurus (free) or Velja (free with paid Pro). If you'd
+        rather write rules in JavaScript, Finicky is excellent. If you'll pay for a polished GUI,
+        use Choosy. If you want a tiny native binary you configure in YAML and never see again —
+        that's Triage.
       </p>
     </div>
 
