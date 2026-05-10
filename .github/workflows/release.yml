@@ -1,0 +1,93 @@
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to build (e.g. v0.1.0). Used only for manual runs."
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve version from tag
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            ref="${{ inputs.tag }}"
+          else
+            ref="${GITHUB_REF#refs/tags/}"
+          fi
+          version="${ref#v}"
+          echo "VERSION=${version}" >> "$GITHUB_ENV"
+          echo "TAG=v${version}" >> "$GITHUB_ENV"
+
+      - name: Build universal Triage.app
+        run: UNIVERSAL=1 ./Scripts/build.sh release
+
+      - name: Verify Info.plist version matches tag
+        run: |
+          plist_version=$(/usr/libexec/PlistBuddy -c "Print :CFBundleShortVersionString" Triage.app/Contents/Info.plist)
+          if [ "$plist_version" != "$VERSION" ]; then
+            echo "::error ::Tag $TAG but Info.plist CFBundleShortVersionString is $plist_version. Bump the plist before tagging."
+            exit 1
+          fi
+
+      - name: Verify universal binary
+        run: |
+          archs=$(lipo -archs Triage.app/Contents/MacOS/triage)
+          echo "Built archs: $archs"
+          for required in arm64 x86_64; do
+            if ! echo "$archs" | grep -qw "$required"; then
+              echo "::error ::Binary missing $required slice (have: $archs)"
+              exit 1
+            fi
+          done
+
+      - name: Run tests
+        run: swift test
+
+      - name: Package ZIP
+        run: ditto -c -k --keepParent Triage.app "Triage-${VERSION}.zip"
+
+      - name: Install create-dmg
+        run: brew install create-dmg
+
+      - name: Package DMG
+        run: |
+          create-dmg \
+            --volname "Triage ${VERSION}" \
+            --window-size 540 380 \
+            --icon-size 100 \
+            --icon "Triage.app" 140 180 \
+            --app-drop-link 400 180 \
+            --no-internet-enable \
+            "Triage-${VERSION}.dmg" \
+            Triage.app
+
+      - name: Generate SHA256SUMS
+        run: shasum -a 256 "Triage-${VERSION}.zip" "Triage-${VERSION}.dmg" > SHA256SUMS.txt
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TAG }}
+          name: Triage ${{ env.TAG }}
+          files: |
+            Triage-${{ env.VERSION }}.zip
+            Triage-${{ env.VERSION }}.dmg
+            SHA256SUMS.txt
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ contains(env.VERSION, '-beta') || contains(env.VERSION, '-rc') || contains(env.VERSION, '-alpha') }}
+          body: |
+            > **Beta — unsigned build.** Gatekeeper will warn the first time you launch the app. The Homebrew Cask and `install.sh` paths strip the quarantine attribute automatically; if you use the DMG directly, right-click the app and choose *Open* the first time.
+
+            See `SHA256SUMS.txt` for artifact hashes.
