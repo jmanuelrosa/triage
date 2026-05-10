@@ -13,3 +13,10 @@ poc/openwith-poc
 
 # Logs
 *.log
+
+# Astro / Node (landing site under web/)
+node_modules/
+dist/
+.astro/
+.env
+.env.production
