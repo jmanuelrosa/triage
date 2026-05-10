@@ -88,15 +88,49 @@ A live, fuller example with Chrome multi-profile is at [`config.example.yaml`](.
 
 ## ⬇️ Installation
 
-> **Beta.** No notarized release / Homebrew cask yet — you build it yourself. Tested on macOS 13+, Apple Silicon. ~5 minutes.
+> **Beta — unsigned builds.** Triage is not yet code-signed with an Apple Developer ID, so Gatekeeper would normally refuse to launch it. The Homebrew Cask and `install.sh` paths strip the quarantine attribute automatically. If you download the DMG directly, you'll need to right-click the app and choose *Open* the first time.
 
-**Requirements**
-- macOS 13 or later
-- Xcode Command Line Tools (`xcode-select --install`) — the full Xcode is *not* needed
+Requires macOS 13 or later. Universal binary — runs on both Apple Silicon and Intel.
 
-**Build & install**
+### Option 1: Homebrew (recommended)
 
-```bash
+```sh
+brew install --cask jmanuelrosa/triage/triage
+```
+
+Updates ride the same channel: `brew upgrade --cask triage` once a new release is out.
+
+### Option 2: curl | bash
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/jmanuelrosa/triage/main/Scripts/install.sh | bash
+```
+
+This script downloads the latest release ZIP, copies `Triage.app` to `/Applications`, strips the Gatekeeper quarantine, registers with LaunchServices, and launches the app. Inspect it before running if you'd like:
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/jmanuelrosa/triage/main/Scripts/install.sh -o install.sh
+less install.sh
+bash install.sh
+```
+
+### Option 3: DMG download
+
+1. Download `Triage-<version>.dmg` from the [latest release](https://github.com/jmanuelrosa/triage/releases/latest).
+2. Open it, drag `Triage.app` to `/Applications`.
+3. **First launch only:** right-click `Triage.app` → *Open* (Gatekeeper dialog → click *Open*). After that, normal launches work without prompting.
+
+   If you'd rather strip the quarantine attribute up front:
+
+   ```sh
+   xattr -dr com.apple.quarantine /Applications/Triage.app
+   ```
+
+### Option 4: Build from source
+
+For development or if you prefer to compile yourself.
+
+```sh
 git clone https://github.com/jmanuelrosa/triage.git
 cd triage
 ./Scripts/build.sh
@@ -105,11 +139,15 @@ cp -R Triage.app /Applications/
 open /Applications/Triage.app
 ```
 
-**Set as default browser**
+Requires Xcode Command Line Tools (`xcode-select --install`); the full Xcode is **not** needed.
 
-System Settings → Desktop & Dock → Default web browser → **Triage**.
+> Source builds produce a binary for *your* arch only (arm64 or x86_64). The Homebrew/DMG/`install.sh` channels ship a universal binary built in CI on a machine with full Xcode — use those if you need to install on the other architecture.
 
-The first time you click on Triage's menu bar icon → *Open Config File* → the empty template is created at `~/.config/triage/config.yaml`. Edit it; Triage reloads on save.
+### After installing — set as default browser
+
+**System Settings → Desktop & Dock → Default web browser → Triage**.
+
+Then click Triage's menu bar icon (top-right) → *Open Config File* — the empty template is created at `~/.config/triage/config.yaml`. Edit it; Triage reloads on save.
 
 ## ⚙️ Configuration
 
