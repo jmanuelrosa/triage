@@ -1,0 +1,103 @@
+name: Bug report
+description: Triage routed a URL incorrectly, crashed, or otherwise misbehaved.
+title: "[bug] "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to file this. Please fill in the fields below — the more concrete the report, the faster it gets fixed.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: One or two sentences describing the bug.
+      placeholder: "Clicking a github.com/<work-org> URL from Slack opens in my personal Helium instead of the work Chrome profile."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Numbered steps the maintainer can follow exactly.
+      placeholder: |
+        1. Set Triage as default browser
+        2. Add this rule to ~/.config/triage/config.yaml: ...
+        3. From Slack, click https://github.com/foo/bar
+        4. Observe: opens in Helium
+        5. Expected: opens in Chrome work_general profile
+    validations:
+      required: true
+
+  - type: textarea
+    id: config
+    attributes:
+      label: Relevant config
+      description: The rule(s) in `~/.config/triage/config.yaml` that demonstrate the bug. Redact private domains if needed.
+      render: yaml
+      placeholder: |
+        browsers:
+          work_general:
+            bundle_id: com.google.Chrome
+            profile: "Work"
+        rules:
+          - host: github.com
+            path: "/work-org/*"
+            browser: work_general
+    validations:
+      required: false
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs
+      description: |
+        Output of:
+        ```sh
+        log show --predicate 'subsystem == "com.jmrosamoncayo.triage"' --info --last 5m
+        ```
+        Plus the contents of `~/.config/triage/triage.log` if it exists.
+      render: text
+    validations:
+      required: false
+
+  - type: input
+    id: version
+    attributes:
+      label: Triage version
+      description: From the menu bar, or `plutil -p /Applications/Triage.app/Contents/Info.plist | grep CFBundleShortVersionString`.
+      placeholder: "0.1.0"
+    validations:
+      required: true
+
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version
+      placeholder: "14.5 (Sonoma)"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: arch
+    attributes:
+      label: Architecture
+      options:
+        - Apple Silicon (arm64)
+        - Intel (x86_64)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: install-path
+    attributes:
+      label: How was Triage installed?
+      options:
+        - Homebrew Cask
+        - install.sh (curl|bash)
+        - DMG download
+        - Built from source
+    validations:
+      required: true
