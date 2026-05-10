@@ -1,5 +1,5 @@
 import Testing
-@testable import OpenWithCore
+@testable import TriageCore
 
 @Suite("BrowserLauncher")
 struct BrowserLauncherTests {

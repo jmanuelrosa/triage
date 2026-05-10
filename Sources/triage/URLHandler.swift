@@ -1,19 +1,19 @@
 import AppKit
 import Foundation
-import OpenWithCore
+import TriageCore
 import OSLog
 
-private let log = Logger(subsystem: "com.jmrosamoncayo.openwith", category: "url-handler")
+private let log = Logger(subsystem: "com.jmrosamoncayo.triage", category: "url-handler")
 
 /// End-to-end URL routing pipeline:
 ///   kAEGetURL → MatchContext → RuleMatcher → Browser → BrowserLauncher → Process.run()
 ///
-/// On no rule match, falls back to the bundle ID stored in `state.json`. If
+/// On no rule match, falls back to the bundle ID stored in `fallback-browser.json`. If
 /// that's missing too, falls back to Safari (Phase 3 will replace this with
 /// LSCopyApplicationURLsForURL enumeration + a one-time menu-bar prompt).
 struct URLHandler {
 
-    /// Last-resort fallback when state.json is missing / unreadable.
+    /// Last-resort fallback when fallback-browser.json is missing / unreadable.
     static let ultimateFallbackBundleID = "com.apple.Safari"
 
     let configURL: URL
@@ -25,7 +25,7 @@ struct URLHandler {
         configURL: URL = Config.defaultURL,
         stateURL: URL = State.defaultURL,
         chromeLocalStateURL: URL = ChromeProfileResolver.defaultLocalStateURL,
-        ownBundleID: String = Bundle.main.bundleIdentifier ?? "com.jmrosamoncayo.openwith"
+        ownBundleID: String = Bundle.main.bundleIdentifier ?? "com.jmrosamoncayo.triage"
     ) {
         self.configURL = configURL
         self.stateURL = stateURL
@@ -62,10 +62,10 @@ struct URLHandler {
 
         var browser = resolveBrowser(config: config, context: context)
 
-        // Avoid an infinite loop if state.json or a misconfigured rule points back at us.
+        // Avoid an infinite loop if fallback-browser.json or a misconfigured rule points back at us.
         if browser.bundleID.caseInsensitiveCompare(ownBundleID) == .orderedSame {
             log.error("""
-            resolved browser is openwith itself (\(browser.bundleID, privacy: .public)) — \
+            resolved browser is Triage itself (\(browser.bundleID, privacy: .public)) — \
             falling back to \(Self.ultimateFallbackBundleID, privacy: .public) to avoid a loop
             """)
             browser = Browser(bundleID: Self.ultimateFallbackBundleID)
@@ -81,6 +81,7 @@ struct URLHandler {
             return try Config.load(from: configURL)
         } catch {
             log.error("config load failed: \(String(describing: error), privacy: .public)")
+            FileLog.error("config load failed during URL routing — falling through to fallback browser: \(error)")
             return Config()
         }
     }
@@ -112,7 +113,7 @@ struct URLHandler {
         if let state = try? State.load(from: stateURL) {
             fallbackID = state.fallbackBrowserBundleID
         } else {
-            log.error("state.json missing/unreadable — using ultimate fallback Safari")
+            log.error("fallback-browser.json missing/unreadable — using ultimate fallback Safari")
             fallbackID = Self.ultimateFallbackBundleID
         }
         return Browser(bundleID: fallbackID)

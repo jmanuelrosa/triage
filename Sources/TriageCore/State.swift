@@ -1,9 +1,9 @@
 import Foundation
 
-/// Persistent app state, kept in `~/.config/openwith/state.json`.
+/// Persistent app state, kept in `~/.config/triage/fallback-browser.json`.
 ///
 /// Currently holds the bundle ID of the system's default browser captured at
-/// openwith's first launch — used as the silent fallback for URLs that match
+/// Triage's first launch — used as the silent fallback for URLs that match
 /// no rule. The user can change it later via the menu bar.
 public struct State: Codable, Equatable {
     public var fallbackBrowserBundleID: String
@@ -79,9 +79,9 @@ public extension State {
         }
     }
 
-    /// `~/.config/openwith/state.json`.
+    /// `~/.config/triage/fallback-browser.json`.
     static var defaultURL: URL {
         URL(fileURLWithPath: NSHomeDirectory())
-            .appendingPathComponent(".config/openwith/state.json")
+            .appendingPathComponent(".config/triage/fallback-browser.json")
     }
 }

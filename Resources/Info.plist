@@ -3,13 +3,13 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleIdentifier</key>
-    <string>com.jmrosamoncayo.openwith</string>
+    <string>com.jmrosamoncayo.triage</string>
     <key>CFBundleName</key>
-    <string>openwith</string>
+    <string>Triage</string>
     <key>CFBundleDisplayName</key>
-    <string>openwith</string>
+    <string>Triage</string>
     <key>CFBundleExecutable</key>
-    <string>openwith</string>
+    <string>triage</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
     <key>CFBundleVersion</key>
@@ -18,10 +18,15 @@
     <string>0.1.0</string>
     <key>LSMinimumSystemVersion</key>
     <string>13.0</string>
-    <!-- Intentionally NOT setting LSUIElement here. Static LSUIElement excludes
-         us from the System Settings → Default web browser picker. We achieve
-         the same "no dock icon" behavior by calling
-         NSApplication.shared.setActivationPolicy(.accessory) at runtime. -->
+    <!-- Hide from Dock and Cmd-Tab. Runtime setActivationPolicy(.accessory)
+         alone leaves a ~half-second flash because LaunchServices decides Dock
+         presence from the static plist before our policy call lands.
+         Re-tested 2026-05-10: with CFBundleDocumentTypes for public.html
+         present (below), LSUIElement=true does NOT remove us from the System
+         Settings → Default web browser picker — contradicting the Phase 0
+         spike. Velja / Choosy / Finicky all ship with this combination. -->
+    <key>LSUIElement</key>
+    <true/>
     <key>NSPrincipalClass</key>
     <string>NSApplication</string>
     <key>CFBundleURLTypes</key>

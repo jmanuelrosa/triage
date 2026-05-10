@@ -1,4 +1,9 @@
-# openwith — TODO
+# Triage — TODO
+
+> Project was originally scaffolded under the name **openwith** through Phases 0–2.
+> Renamed to **Triage** on 2026-05-08. Historical entries below preserve the
+> original wording where it refers to the Phase 0 throwaway POC bundle (`openwith-poc`)
+> and the directory layout that existed before the rename.
 
 Chronological task list. Plan: `~/.claude/plans/i-would-like-to-bright-pixel.md`.
 Tick items off as you finish them. Skip ahead only if the item is genuinely independent.
@@ -9,9 +14,9 @@ Tick items off as you finish them. Skip ahead only if the item is genuinely inde
 
 Validate the assumptions that could kill the architecture before writing real code.
 
-- [x] **POC: `.accessory` app as default browser** ✅ 2026-05-08
-  Built `poc/openwith-poc.app`. Confirmed URLs route to it once selected as default. Two non-obvious gotchas surfaced:
-  - `LSUIElement = true` in Info.plist excludes the app from System Settings → Default web browser picker. Use runtime `setActivationPolicy(.accessory)` instead.
+- [x] **POC: `.accessory` app as default browser** ✅ 2026-05-08 (LSUIElement finding revised 2026-05-10)
+  Built `poc/openwith-poc.app`. Confirmed URLs route to it once selected as default.
+  - **Correction (2026-05-10):** the original spike claimed `LSUIElement = true` excludes us from the System Settings → Default web browser picker. Re-tested with `CFBundleDocumentTypes` declared and **the picker still lists Triage**. Runtime `setActivationPolicy(.accessory)` *alone* leaves a ~half-second Dock flash on cold launch because LaunchServices reads dock-presence from the static plist before our policy call lands. Fix: ship with `LSUIElement=true` *and* keep the runtime call as defense-in-depth. Velja / Choosy / Finicky all use this combination.
   - `CFBundleDocumentTypes` declaring `public.html` as Viewer is required to be recognized as a "browser" (not just an http URL handler). Confirmed via Chrome and Helium Info.plist comparison.
   - Register `kAEGetURL` handler in `applicationWillFinishLaunching`, NOT `Did` — cold-launch URLs arrive before `Did`.
 
@@ -23,7 +28,7 @@ Validate the assumptions that could kill the architecture before writing real co
   `net.imput.helium` (confirmed via `plutil` on Helium's Info.plist). URL invocation pattern still to be tested in the Chrome spike step.
 
 - [x] **Spike: Chrome profile flag** ✅ 2026-05-08
-  `open -na "Google Chrome" --args --profile-directory="Profile 4" "https://example.com"` works. Decision made to use **friendly profile names** in YAML (e.g. `"Jose Manuel [Dev]"`); openwith resolves them via Chrome's `Local State` JSON at launch time. Falls back to literal directory name if no display match.
+  `open -na "Google Chrome" --args --profile-directory="Profile 4" "https://example.com"` works. Decision made to use **friendly profile names** in YAML (e.g. `"Jose Manuel [Dev]"`); Triage resolves them via Chrome's `Local State` JSON at launch time. Falls back to literal directory name if no display match.
 
   Available local profiles:
   - `Default` → josemanuel.rosamoncayo@gmail.com
@@ -38,7 +43,7 @@ Validate the assumptions that could kill the architecture before writing real co
 
 ## Phase 1 — Scaffold ✅ 2026-05-08
 
-- [x] SwiftPM project at project root (`Package.swift`, `Sources/openwith/`, `Resources/Info.plist`, `Scripts/build.sh`)
+- [x] SwiftPM project at project root (`Package.swift`, `Sources/triage/`, `Resources/Info.plist`, `Scripts/build.sh`)
 - [x] Yams 5.4.0 pinned via `Package.resolved`
 - [x] `Resources/Info.plist` with all Phase 0 gotchas baked in (no `LSUIElement`, `CFBundleDocumentTypes` for `public.html`/`public.xhtml`/`public.url`)
 - [x] `main.swift` bootstraps `NSApplication` with `.accessory` policy
@@ -52,28 +57,27 @@ Validate the assumptions that could kill the architecture before writing real co
 
 Build inside-out: pure logic first (testable), then I/O, then UI.
 
-- [x] `RuleMatcher.swift` ✅ 2026-05-08 — host glob + path glob + source-app (bundle ID or display name), first-match-wins, case-insensitive everywhere. Lives in new `OpenWithCore` library target.
-- [x] `Tests/OpenWithCoreTests/RuleMatcherTests.swift` ✅ 2026-05-08 — 25 swift-testing cases (XCTest needs full Xcode; CLT-only setup uses swift-testing as an explicit SwiftPM dep).
+- [x] `RuleMatcher.swift` ✅ 2026-05-08 — host glob + path glob + source-app (bundle ID or display name), first-match-wins, case-insensitive everywhere. Lives in new `TriageCore` library target.
+- [x] `Tests/TriageCoreTests/RuleMatcherTests.swift` ✅ 2026-05-08 — 25 swift-testing cases (XCTest needs full Xcode; CLT-only setup uses swift-testing as an explicit SwiftPM dep).
 - [x] `Config.swift` ✅ 2026-05-08 — Yams decode, validation (every rule must reference a declared browser), `Config.parse(yaml:)` + `Config.load(from:)`, structured `ConfigError` (Equatable). 11 tests in `ConfigTests`.
 - [x] `ChromeProfileResolver.swift` ✅ 2026-05-08 — parses Chrome's `Local State` JSON; maps friendly profile names → directory names. Passthrough for unknown values (so `"Profile 4"` and `"Default"` work as escape hatches). Duplicate display names handled deterministically (first-by-directory-key). 12 tests in `ChromeProfileResolverTests`.
-- [x] `State.swift` ✅ 2026-05-08 — `state.json` Codable (snake_case fields, ISO-8601 dates), `State.load`/`save` with atomic write + parent-directory creation, `defaultURL = ~/.config/openwith/state.json`. 8 tests in `StateTests`.
+- [x] `State.swift` ✅ 2026-05-08 — `fallback-browser.json` Codable (snake_case fields, ISO-8601 dates), `State.load`/`save` with atomic write + parent-directory creation, `defaultURL = ~/.config/triage/fallback-browser.json`. 8 tests in `StateTests`. (File was originally named `state.json`; renamed for clarity 2026-05-09.)
 - [x] `BrowserLauncher.swift` ✅ 2026-05-08 — pure argv builder for `/usr/bin/open`, with/without `--profile-directory`. 8 tests.
-- [x] `URLHandler.swift` ✅ 2026-05-08 — full pipeline: kAEGetURL → MatchContext → RuleMatcher → browser resolution → BrowserLauncher → `Process.run`. Loop protection if a rule/state points back at us. Safari as ultimate fallback when state.json is missing. Validated end-to-end with Slack → GitHub addingwell URL → Helium.
+- [x] `URLHandler.swift` ✅ 2026-05-08 — full pipeline: kAEGetURL → MatchContext → RuleMatcher → browser resolution → BrowserLauncher → `Process.run`. Loop protection if a rule/state points back at us. Safari as ultimate fallback when fallback-browser.json is missing. Validated end-to-end with Slack → GitHub addingwell URL → Helium.
 - [x] `AppDelegate.swift` slimmed to AE handler bootstrap + delegation to `URLHandler`. Status bar / menu still pending (next slice).
 - [x] `config.example.yaml` ✅ 2026-05-08 — committed plan example as a starting template.
-- [ ] `State.swift` — `state.json` read/write, first-run capture of `LSCopyDefaultHandlerForURLScheme("http")`
-- [ ] `BrowserLauncher.swift` — `open -na <bundle_id> --args [--profile-directory=<profile>] <url>` via `Process`
-- [ ] `URLHandler.swift` — register `kAEGetURL` handler, capture source app, resolve via RuleMatcher, launch via BrowserLauncher
-- [ ] `AppDelegate.swift` — status-bar item, menu: *Reload config*, *Open config file*, *Set fallback browser →* (submenu of installed browsers), *Quit*
+- [x] AppDelegate menu (status bar item, *Reload Config*, *Open Config File*, *Set Fallback Browser →*, *Quit*) ✅ 2026-05-08
+- [x] **Project rename: openwith → Triage** ✅ 2026-05-08 — bundle ID `com.jmrosamoncayo.triage`, executable `triage`, .app `Triage.app`, library `TriageCore`, paths `~/.config/triage/{config.yaml, fallback-browser.json}`. Phase 0 POC (`openwith-poc`) kept as historical artifact.
+- [x] First-run state capture ✅ 2026-05-09 — `FirstRunSetup.captureDefaultBrowserIfNeeded()` runs at the start of `applicationWillFinishLaunching` (before AE handler registration). Uses `NSWorkspace.urlForApplication(toOpen:)` against an http probe URL and persists the resolved bundle ID to `fallback-browser.json` if absent. Skips if the captured handler is Triage itself (Phase 3 covers that edge case).
 
 ---
 
 ## Phase 3 — Polish
 
-- [ ] Config file watcher (`DispatchSource.makeFileSystemObjectSource`) for live reload on save
-- [ ] *Set fallback browser* submenu writes to `state.json` and updates in-memory state
-- [ ] Edge case: `state.json` missing on first launch *because user set us as default before launching us* → enumerate installed browsers via `LSCopyApplicationURLsForURL`, pick first non-`openwith`, surface a one-time menu-bar notice
-- [ ] Empty/malformed config → log to `~/.config/openwith/openwith.log`, fall back to direct fallback-browser launch (don't crash, don't drop URLs on the floor)
+- [x] Config file watcher ✅ 2026-05-09 — `ConfigWatcher` uses `DispatchSource.makeFileSystemObjectSource(eventMask: [.write, .delete, .rename, .extend])`, reopens the FD on each event to handle atomic-save (editors that write-tmp-then-rename), and debounces by 100 ms. Calls back on the main queue. On parse failure it pops an alert; on success it just logs (silent — most edits succeed). Started in `applicationDidFinishLaunching`; restarted from `openConfigFile` after the template is written so first-run edits get picked up.
+- [x] *Set fallback browser* submenu ✅ 2026-05-09 — already wired in Phase 2: `AppDelegate.setFallback(_:)` saves to `fallback-browser.json` and rebuilds the menu so the checkmark moves. URLHandler re-reads state on every URL event so there is no in-memory cache to invalidate.
+- [x] Edge case: already-default at first launch ✅ 2026-05-10 — `FirstRunSetup.captureDefaultBrowserIfNeeded()` returns a `CaptureResult` (`alreadyHadState | captured | inferred | noBrowserFound`). When the system default resolves to Triage itself, falls through to `InstalledBrowsers.list(excluding:)` and picks the first sibling. `AppDelegate.notifyIfInferredFallback()` shows a one-time alert in `applicationDidFinishLaunching` for the `inferred` case (one-shot semantic comes free from `fallback-browser.json` existing afterward). Browser enumeration extracted from `AppDelegate.installedBrowsers()` into shared `InstalledBrowsers` helper.
+- [x] Empty/malformed config robustness ✅ 2026-05-10 — `FileLog` writes a plain-text append-only error log to `~/.config/triage/triage.log` (timestamped, ISO-8601, ERROR-level only). Wired into `URLHandler.loadConfigOrEmpty()` (failure during URL routing) and `AppDelegate.handleConfigReload`/`validateConfigAtStartup` (broken YAML at launch and on save). Fall-through to the fallback browser was already in place since Phase 2; this slice adds the visibility piece. Startup validation pops a modal alert in addition to writing the log so the user can't miss broken YAML on launch.
 
 ---
 
@@ -81,7 +85,7 @@ Build inside-out: pure logic first (testable), then I/O, then UI.
 
 - [ ] Run the full smoke test from the plan's *Verification* section (steps 1–10)
 - [ ] Daily-drive for two weeks. Track friction in this file (add a *Field notes* section below).
-- [ ] Confirm idle resource cost: `top -pid $(pgrep openwith)` shows < 50MB RSS, ~0% CPU
+- [ ] Confirm idle resource cost: `top -pid $(pgrep triage)` shows < 50MB RSS, ~0% CPU
 
 ---
 
