@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Question or "is this the right tool for me?"
+    url: https://github.com/jmanuelrosa/triage/discussions
+    about: For usage questions, configuration help, or design discussions, please use Discussions instead of opening an issue.
+  - name: Security vulnerability
+    url: https://github.com/jmanuelrosa/triage/security/advisories/new
+    about: Don't open a public issue for security reports. Use a private Security Advisory.

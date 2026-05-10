@@ -1,0 +1,18 @@
+# CODEOWNERS — automatic reviewer assignment for pull requests.
+# Reference: https://docs.github.com/en/repositories/managing-your-repositories-settings-and-security/customizing-your-repository/about-code-owners
+#
+# Order matters: the LAST matching pattern wins for any given file. Put broad
+# patterns first, narrow overrides last.
+
+# Default owner for everything in the repo.
+*                                   @jmanuelrosa
+
+# Release pipeline — touch with care.
+/.github/workflows/                 @jmanuelrosa
+/Scripts/release.sh                 @jmanuelrosa
+/Scripts/install.sh                 @jmanuelrosa
+/Casks/                             @jmanuelrosa
+/docs/release.md                    @jmanuelrosa
+
+# Security policy must be reviewed before any change.
+/SECURITY.md                        @jmanuelrosa

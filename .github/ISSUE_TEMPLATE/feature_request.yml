@@ -1,0 +1,57 @@
+name: Feature request
+description: Propose a new capability or behavior change.
+title: "[feature] "
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Triage is intentionally narrow — see [the *Out-of-scope changes* section in CONTRIBUTING.md](../blob/main/CONTRIBUTING.md#out-of-scope-changes) before filing. Features that push Triage toward "general-purpose router" or "rules editor UI" are unlikely to land. The bar for new dependencies is high.
+
+        That said, well-scoped routing/matching/UX improvements are welcome.
+
+  - type: textarea
+    id: workflow
+    attributes:
+      label: What workflow does this unblock?
+      description: Describe the situation where you currently work around Triage's behavior. Concrete > abstract.
+      placeholder: "I want links from Linear (any sub-domain) to always go to my work browser, but Linear's macOS app sends URLs that look like they came from Safari, so source_app: Linear doesn't match."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: What would you want Triage to do? A YAML example, a new flag, a menu item — whatever shape the change takes.
+      placeholder: |
+        Add a `referrer_app` matcher that checks the parent process tree, not just the immediate AE sender.
+
+        rules:
+          - referrer_app: Linear
+            browser: work
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives you considered
+      description: Existing Triage features you tried, or other tools (Velja, Finicky, …) that solve this and how. Helps gauge whether the feature is necessary or is already covered elsewhere.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: scope
+    attributes:
+      label: Implementation surface
+      description: Best guess — which part of the codebase would change?
+      options:
+        - TriageCore (rule matching, config, profile resolution)
+        - URL handling pipeline (URLHandler / AppDelegate)
+        - Menu bar UI
+        - Build / release pipeline
+        - Documentation only
+        - Not sure
+    validations:
+      required: true
