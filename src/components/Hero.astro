@@ -1,0 +1,55 @@
+---
+const repoUrl = "https://github.com/jmanuelrosa/triage";
+---
+
+<section class="relative overflow-hidden">
+  <div class="mx-auto max-w-5xl px-6 pt-20 pb-24 sm:pt-28 sm:pb-32">
+    <div class="flex items-center gap-2 text-xs uppercase tracking-widest text-[color:var(--color-fg-mute)]">
+      <span class="inline-block h-1.5 w-1.5 rounded-full bg-[color:var(--color-accent-3)]"></span>
+      <span>macOS · beta · open source</span>
+    </div>
+
+    <h1 class="mt-6 text-balance text-5xl font-semibold leading-[1.05] tracking-tight sm:text-6xl md:text-7xl">
+      Rule-based,<br class="hidden sm:block" />
+      <span class="bg-gradient-to-r from-[color:var(--color-accent)] via-[color:var(--color-accent-3)] to-[color:var(--color-accent-2)] bg-clip-text text-transparent">
+        never asks.
+      </span>
+    </h1>
+
+    <p class="mt-7 max-w-2xl text-lg leading-relaxed text-[color:var(--color-fg-soft)] sm:text-xl">
+      A native macOS menu-bar app that silently routes every clicked link to the right
+      browser — and the right Chrome profile — based on rules you write in a YAML file.
+    </p>
+
+    <p class="mt-3 max-w-2xl text-sm text-[color:var(--color-fg-mute)]">
+      No picker. No dock icon. No Node runtime.
+      <span class="text-[color:var(--color-fg-soft)]">~500 lines of Swift</span>,
+      single-digit MB of RAM at rest.
+    </p>
+
+    <div class="mt-10 flex flex-wrap items-center gap-3">
+      <a
+        href={repoUrl}
+        class="inline-flex items-center gap-2 rounded-md bg-[color:var(--color-fg)] px-5 py-3 text-sm font-medium text-[color:var(--color-bg)] transition hover:bg-white"
+      >
+        <svg viewBox="0 0 24 24" class="h-4 w-4" aria-hidden="true" fill="currentColor">
+          <path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.56v-2c-3.2.7-3.87-1.36-3.87-1.36-.52-1.32-1.27-1.67-1.27-1.67-1.04-.71.08-.7.08-.7 1.15.08 1.76 1.18 1.76 1.18 1.02 1.75 2.69 1.24 3.34.95.1-.74.4-1.24.72-1.53-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.18-3.1-.12-.29-.51-1.46.11-3.04 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.79 0c2.21-1.49 3.18-1.18 3.18-1.18.62 1.58.23 2.75.11 3.04.74.81 1.18 1.84 1.18 3.1 0 4.43-2.69 5.41-5.25 5.69.41.36.78 1.06.78 2.13v3.16c0 .31.21.68.8.56A11.51 11.51 0 0 0 23.5 12C23.5 5.65 18.35.5 12 .5Z"/>
+        </svg>
+        View on GitHub
+      </a>
+
+      <a
+        href="#how-it-works"
+        class="inline-flex items-center gap-2 rounded-md border border-[color:var(--color-line)] bg-[color:var(--color-bg-soft)] px-5 py-3 text-sm font-medium text-[color:var(--color-fg)] transition hover:border-[color:var(--color-fg-mute)]"
+      >
+        See how it works
+        <span aria-hidden="true">→</span>
+      </a>
+    </div>
+
+    <div class="mt-12 inline-flex items-center gap-2 rounded-full border border-[color:var(--color-line)] bg-[color:var(--color-bg-soft)]/60 px-3 py-1.5 text-xs text-[color:var(--color-fg-soft)]">
+      <span class="font-mono text-[color:var(--color-accent-3)]">$</span>
+      <code class="font-mono">git clone https://github.com/jmanuelrosa/triage.git</code>
+    </div>
+  </div>
+</section>

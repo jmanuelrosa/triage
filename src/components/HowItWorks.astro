@@ -1,0 +1,116 @@
+---
+import { Code } from "astro:components";
+
+const yamlSnippet = `browsers:
+  personal:
+    bundle_id: net.imput.helium
+  work_general:
+    bundle_id: com.google.Chrome
+    profile: "Work"
+  work_dev:
+    bundle_id: com.google.Chrome
+    profile: "Work [Dev]"
+
+rules:
+  # All work domains go to the dev Chrome profile
+  - host: "*.example.com"
+    browser: work_dev
+
+  # Specific GitHub orgs go to specific places
+  - host: github.com
+    path: "/work-org/*"
+    browser: work_general
+
+  # Anything Slack opens, regardless of URL,
+  # goes to the work browser
+  - source_app: Slack
+    browser: work_general
+`;
+
+const steps = [
+  {
+    n: "01",
+    title: "Click a link, anywhere",
+    body: "Slack, Mail, Notes, Terminal — macOS hands the URL to the system default browser via Apple Events.",
+  },
+  {
+    n: "02",
+    title: "Triage matches a rule",
+    body: "The URL host, path, and originating app are evaluated top-down against your YAML. First match wins.",
+  },
+  {
+    n: "03",
+    title: "The right browser opens",
+    body: "Triage shells out: open -na <bundle> --args --profile-directory=<dir> <url>. Then it goes back to sleep.",
+  },
+];
+---
+
+<section id="how-it-works" class="relative border-y border-[color:var(--color-line)] bg-[color:var(--color-bg-soft)]/40">
+  <div class="mx-auto max-w-5xl px-6 py-20 sm:py-24">
+    <div class="max-w-2xl">
+      <p class="text-xs uppercase tracking-widest text-[color:var(--color-accent-3)]">How it works</p>
+      <h2 class="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+        One YAML file. Three steps.
+      </h2>
+      <p class="mt-4 text-[color:var(--color-fg-soft)]">
+        Set Triage as your default browser, write a config describing where links should go,
+        and forget it. From then on, every clicked link gets routed deterministically.
+      </p>
+    </div>
+
+    <div class="mt-12 grid gap-10 lg:grid-cols-[1fr_1.1fr] lg:gap-14">
+      <ol class="space-y-7">
+        {steps.map((s) => (
+          <li class="flex gap-5">
+            <span class="font-mono text-sm text-[color:var(--color-fg-mute)]">{s.n}</span>
+            <div>
+              <h3 class="text-base font-medium text-[color:var(--color-fg)]">{s.title}</h3>
+              <p class="mt-1.5 text-sm leading-relaxed text-[color:var(--color-fg-soft)]">{s.body}</p>
+            </div>
+          </li>
+        ))}
+
+        <li class="flex gap-5 pt-2">
+          <span class="font-mono text-sm text-[color:var(--color-fg-mute)]">→</span>
+          <p class="text-sm leading-relaxed text-[color:var(--color-fg-soft)]">
+            Match rules use first-match-wins. <code class="font-mono text-[color:var(--color-accent)]">host</code>,
+            <code class="font-mono text-[color:var(--color-accent)]">path</code>, and
+            <code class="font-mono text-[color:var(--color-accent)]">source_app</code> are all optional —
+            missing field means match anything. <code class="font-mono">*</code> globs are case-insensitive
+            and anchored.
+          </p>
+        </li>
+      </ol>
+
+      <div class="overflow-hidden rounded-xl border border-[color:var(--color-line)] bg-[color:var(--color-bg)] shadow-2xl shadow-black/40">
+        <div class="flex items-center justify-between border-b border-[color:var(--color-line)] bg-[color:var(--color-bg-soft)] px-4 py-2.5">
+          <div class="flex items-center gap-1.5">
+            <span class="h-2.5 w-2.5 rounded-full bg-[#ff5f57]"></span>
+            <span class="h-2.5 w-2.5 rounded-full bg-[#febc2e]"></span>
+            <span class="h-2.5 w-2.5 rounded-full bg-[#28c840]"></span>
+          </div>
+          <span class="font-mono text-xs text-[color:var(--color-fg-mute)]">~/.config/triage/config.yaml</span>
+          <span class="w-12"></span>
+        </div>
+        <div class="yaml-code">
+          <Code code={yamlSnippet} lang="yaml" theme="github-dark-default" />
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .yaml-code :global(pre.astro-code) {
+    margin: 0;
+    padding: 1.25rem 1.25rem;
+    background: transparent !important;
+    font-size: 13px;
+    line-height: 1.65;
+    overflow-x: auto;
+  }
+  .yaml-code :global(pre.astro-code code) {
+    background: transparent;
+  }
+</style>

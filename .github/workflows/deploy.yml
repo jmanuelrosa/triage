@@ -1,0 +1,65 @@
+name: Deploy landing to GitHub Pages
+
+# Analytics (Umami) is opt-in via two GitHub repository variables:
+#   Repo → Settings → Secrets and variables → Actions → Variables
+#     UMAMI_WEBSITE_ID   (required to enable; the UUID from your Umami dashboard)
+#     UMAMI_SCRIPT_URL   (optional; defaults to https://cloud.umami.is/script.js — override if self-hosting)
+# When UMAMI_WEBSITE_ID is unset the script tag is omitted entirely.
+# These are *variables*, not secrets — the ID is exposed in the HTML by design.
+#
+# For local builds, create a .env file at repo root with the same variable
+# names (PUBLIC_UMAMI_WEBSITE_ID=..., optionally PUBLIC_UMAMI_SCRIPT_URL=...).
+# .env is gitignored.
+
+on:
+  push:
+    branches:
+      - feat/landing-page
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build site
+        env:
+          PUBLIC_UMAMI_WEBSITE_ID: ${{ vars.UMAMI_WEBSITE_ID }}
+          PUBLIC_UMAMI_SCRIPT_URL: ${{ vars.UMAMI_SCRIPT_URL }}
+        run: npm run build
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

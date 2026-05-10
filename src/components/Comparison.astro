@@ -1,0 +1,135 @@
+---
+type Cell = { value: string; tone?: "yes" | "no" | "warn" | "neutral" };
+type Row = {
+  name: string;
+  href?: string;
+  highlighted?: boolean;
+  asks: Cell;
+  native: Cell;
+  profiles: Cell;
+  cost: Cell;
+  niche: string;
+};
+
+const rows: Row[] = [
+  {
+    name: "Triage",
+    highlighted: true,
+    asks: { value: "No, rules only", tone: "no" },
+    native: { value: "Swift", tone: "yes" },
+    profiles: { value: "First-class", tone: "yes" },
+    cost: { value: "Free", tone: "neutral" },
+    niche: "Silent rule-based routing, YAML-configured",
+  },
+  {
+    name: "Velja",
+    href: "https://github.com/sindresorhus/Velja",
+    asks: { value: "Picker by default", tone: "yes" },
+    native: { value: "Swift", tone: "yes" },
+    profiles: { value: "Limited", tone: "warn" },
+    cost: { value: "Free", tone: "neutral" },
+    niche: "When you want to be asked occasionally",
+  },
+  {
+    name: "Browserosaurus",
+    href: "https://browserosaurus.com/",
+    asks: { value: "Picker", tone: "yes" },
+    native: { value: "Electron", tone: "warn" },
+    profiles: { value: "—", tone: "no" },
+    cost: { value: "Free", tone: "neutral" },
+    niche: "Picker-first, cross-platform-ish",
+  },
+  {
+    name: "Finicky",
+    href: "https://github.com/johnste/finicky",
+    asks: { value: "Rules only", tone: "no" },
+    native: { value: "Swift + JSCore", tone: "yes" },
+    profiles: { value: "Yes", tone: "yes" },
+    cost: { value: "Free", tone: "neutral" },
+    niche: "Rule-based, native — rules in JavaScript",
+  },
+  {
+    name: "Choosy",
+    href: "https://www.choosyosx.com/",
+    asks: { value: "Configurable", tone: "neutral" },
+    native: { value: "Native", tone: "yes" },
+    profiles: { value: "Yes", tone: "yes" },
+    cost: { value: "$12", tone: "neutral" },
+    niche: "Rule-based, native, GUI-configured",
+  },
+];
+
+const toneClass = (tone?: Cell["tone"]) => {
+  switch (tone) {
+    case "yes":
+      return "text-[color:var(--color-accent-3)]";
+    case "no":
+      return "text-[color:var(--color-fg-mute)]";
+    case "warn":
+      return "text-[color:var(--color-accent-2)]";
+    default:
+      return "text-[color:var(--color-fg-soft)]";
+  }
+};
+---
+
+<section id="compare" class="relative">
+  <div class="mx-auto max-w-5xl px-6 py-20 sm:py-24">
+    <div class="max-w-2xl">
+      <p class="text-xs uppercase tracking-widest text-[color:var(--color-accent-2)]">How it compares</p>
+      <h2 class="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+        Several good tools. Different niches.
+      </h2>
+      <p class="mt-4 text-[color:var(--color-fg-soft)]">
+        If you want a picker, use Velja or Browserosaurus. If you'd rather write rules in JavaScript,
+        Finicky is excellent. If you'll pay for a polished GUI, use Choosy. If you want a tiny native
+        binary you configure in YAML and never see again — that's Triage.
+      </p>
+    </div>
+
+    <div class="mt-10 overflow-x-auto rounded-xl border border-[color:var(--color-line)] bg-[color:var(--color-bg-soft)]/60">
+      <table class="w-full min-w-[720px] border-collapse text-left text-sm">
+        <thead>
+          <tr class="border-b border-[color:var(--color-line)] text-xs uppercase tracking-wider text-[color:var(--color-fg-mute)]">
+            <th class="px-5 py-3.5 font-medium">Tool</th>
+            <th class="px-5 py-3.5 font-medium">Asks?</th>
+            <th class="px-5 py-3.5 font-medium">Native?</th>
+            <th class="px-5 py-3.5 font-medium">Chrome profiles</th>
+            <th class="px-5 py-3.5 font-medium">Cost</th>
+            <th class="px-5 py-3.5 font-medium">Niche</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => (
+            <tr
+              class={`border-b border-[color:var(--color-line-soft)] last:border-b-0 ${row.highlighted ? "bg-[color:var(--color-bg)]" : ""}`}
+            >
+              <td class="px-5 py-4">
+                {row.href ? (
+                  <a
+                    href={row.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    class="text-[color:var(--color-fg-soft)] underline decoration-[color:var(--color-line)] underline-offset-4 transition hover:text-[color:var(--color-fg)] hover:decoration-[color:var(--color-fg-mute)]"
+                  >
+                    {row.name}
+                  </a>
+                ) : (
+                  <span class="font-medium text-[color:var(--color-fg)]">
+                    <span class="mr-2 inline-block h-1.5 w-1.5 rounded-full align-middle" style="background: var(--color-accent-3);"></span>
+                    {row.name}
+                  </span>
+                )}
+              </td>
+              <td class={`px-5 py-4 ${toneClass(row.asks.tone)}`}>{row.asks.value}</td>
+              <td class={`px-5 py-4 ${toneClass(row.native.tone)}`}>{row.native.value}</td>
+              <td class={`px-5 py-4 ${toneClass(row.profiles.tone)}`}>{row.profiles.value}</td>
+              <td class={`px-5 py-4 ${toneClass(row.cost.tone)}`}>{row.cost.value}</td>
+              <td class="px-5 py-4 text-[color:var(--color-fg-soft)]">{row.niche}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>

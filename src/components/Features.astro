@@ -1,0 +1,69 @@
+---
+const features = [
+  {
+    title: "Rule-based, never asks",
+    body: "Routes by URL host, path, and source app — first match wins. You write the rules once; Triage just obeys.",
+    accent: "var(--color-accent)",
+  },
+  {
+    title: "First-class Chrome profiles",
+    body: "Use friendly names in YAML (\"Work [Dev]\"); Triage resolves them to Chrome's directory names by reading Local State.",
+    accent: "var(--color-accent-3)",
+  },
+  {
+    title: "Native and invisible",
+    body: "Pure Swift, no Node or Electron. Status-bar item only — no dock icon, no main window. Sleeping process at rest.",
+    accent: "var(--color-accent-2)",
+  },
+  {
+    title: "Live config reload",
+    body: "Edit ~/.config/triage/config.yaml; Triage picks it up on save. Broken YAML pops a modal alert with a plain-text log.",
+    accent: "var(--color-accent)",
+  },
+  {
+    title: "Source-app aware",
+    body: "Match by the app the link came from — Slack, WhatsApp, anything. Useful for routing every work-Slack link to the work browser.",
+    accent: "var(--color-accent-3)",
+  },
+  {
+    title: "Silent fallback",
+    body: "URLs that match no rule open in your previous default browser, captured automatically. Configurable via the menu bar.",
+    accent: "var(--color-accent-2)",
+  },
+];
+---
+
+<section id="features" class="relative">
+  <div class="mx-auto max-w-5xl px-6 py-20 sm:py-24">
+    <div class="max-w-2xl">
+      <h2 class="text-3xl font-semibold tracking-tight sm:text-4xl">
+        Built to disappear.
+      </h2>
+      <p class="mt-4 text-[color:var(--color-fg-soft)]">
+        Six things Triage cares about, and nothing else.
+      </p>
+    </div>
+
+    <ul class="mt-12 grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-[color:var(--color-line)] bg-[color:var(--color-line)] sm:grid-cols-2 lg:grid-cols-3">
+      {features.map((f) => (
+        <li class="bg-[color:var(--color-bg-soft)] p-6 transition hover:bg-[color:var(--color-bg)]">
+          <div
+            class="mb-4 inline-flex h-7 w-7 items-center justify-center rounded-md border border-[color:var(--color-line)]"
+            style={`background: color-mix(in oklab, ${f.accent} 12%, transparent);`}
+          >
+            <span
+              class="inline-block h-1.5 w-1.5 rounded-full"
+              style={`background: ${f.accent};`}
+            ></span>
+          </div>
+          <h3 class="text-base font-medium text-[color:var(--color-fg)]">
+            {f.title}
+          </h3>
+          <p class="mt-2 text-sm leading-relaxed text-[color:var(--color-fg-soft)]">
+            {f.body}
+          </p>
+        </li>
+      ))}
+    </ul>
+  </div>
+</section>

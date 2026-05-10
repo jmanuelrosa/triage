@@ -16,3 +16,10 @@ poc/openwith-poc
 
 # Claude Code project tooling (not part of the app)
 .claude/
+
+# Astro / Node (landing page on feat/landing-page)
+node_modules/
+dist/
+.astro/
+.env
+.env.production
