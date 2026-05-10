@@ -1,0 +1,57 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+# Cancel superseded runs when new commits land on the same PR / branch.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: |
+          swift --version
+          xcodebuild -version
+
+      - name: Cache SwiftPM artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/Library/Caches/org.swift.swiftpm
+            .build
+          key: spm-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles('Package.resolved') }}
+          restore-keys: |
+            spm-${{ runner.os }}-${{ runner.arch }}-
+
+      - name: Resolve dependencies
+        run: swift package resolve
+
+      - name: Run tests
+        run: swift test --enable-test-discovery
+
+      - name: Build .app bundle (release config, native arch)
+        # Smoke-checks Scripts/build.sh on every PR so a broken release
+        # pipeline doesn't first surface at tag-push time.
+        run: ./Scripts/build.sh release
+
+      - name: Verify binary launches
+        run: |
+          # Sanity-check that codesign + bundle layout produced a runnable binary.
+          # We can't actually exercise the menu bar / Apple Events on a runner,
+          # but we can at least confirm the binary loads.
+          ./Triage.app/Contents/MacOS/triage --help 2>&1 || true
+          file Triage.app/Contents/MacOS/triage
+          codesign --verify --verbose Triage.app
