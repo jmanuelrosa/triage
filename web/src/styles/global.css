@@ -1,0 +1,54 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: ui-sans-serif, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+    "Helvetica Neue", Arial, system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Monaco,
+    Consolas, "Liberation Mono", "Courier New", monospace;
+
+  --color-bg: #0a0a0c;
+  --color-bg-soft: #111114;
+  --color-fg: #ededf0;
+  --color-fg-soft: #a1a1aa;
+  --color-fg-mute: #71717a;
+  --color-line: #232328;
+  --color-line-soft: #1a1a1f;
+  --color-accent: #7dd3fc;
+  --color-accent-2: #a78bfa;
+  --color-accent-3: #22d3ee;
+}
+
+html {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "ss01", "cv11";
+}
+
+body {
+  background:
+    radial-gradient(1200px 600px at 80% -10%, rgba(125, 211, 252, 0.08), transparent 60%),
+    radial-gradient(900px 500px at 0% 10%, rgba(167, 139, 250, 0.08), transparent 60%),
+    var(--color-bg);
+  min-height: 100vh;
+}
+
+::selection {
+  background: rgba(125, 211, 252, 0.25);
+  color: var(--color-fg);
+}
+
+code, pre {
+  font-family: var(--font-mono);
+}
+
+/* Subtle hairline border helper */
+.hairline {
+  border: 1px solid var(--color-line);
+}
+.hairline-b {
+  border-bottom: 1px solid var(--color-line);
+}
