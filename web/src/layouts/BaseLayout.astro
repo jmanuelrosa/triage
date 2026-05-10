@@ -1,0 +1,56 @@
+---
+import "../styles/global.css";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = "Triage — rule-based URL routing for macOS",
+  description = "A native macOS menu-bar app that silently routes every clicked link to the right browser — and the right Chrome profile — based on rules you write in a YAML file.",
+} = Astro.props;
+
+const siteUrl = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString() : "";
+
+const umamiWebsiteId = import.meta.env.PUBLIC_UMAMI_WEBSITE_ID;
+const umamiScriptUrl =
+  import.meta.env.PUBLIC_UMAMI_SCRIPT_URL ?? "https://cloud.umami.is/script.js";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#0a0a0c" />
+
+    <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    {siteUrl && <meta property="og:url" content={siteUrl} />}
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+
+    {umamiWebsiteId && (
+      <script
+        is:inline
+        defer
+        src={umamiScriptUrl}
+        data-website-id={umamiWebsiteId}
+      />
+    )}
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>
