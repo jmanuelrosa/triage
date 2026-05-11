@@ -1,0 +1,78 @@
+---
+import { faqEntries } from "../data/faq.ts";
+---
+
+<section id="faq" class="relative border-t border-[color:var(--color-line)]">
+  <div class="mx-auto max-w-5xl px-6 py-20 sm:py-24">
+    <div class="max-w-2xl">
+      <p class="text-xs uppercase tracking-widest text-[color:var(--color-accent-2)]">FAQ</p>
+      <h2 class="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+        Frequently asked questions
+      </h2>
+      <p class="mt-4 text-[color:var(--color-fg-soft)]">
+        Quick answers about installing Triage, writing rules, Chrome profile support,
+        and how it compares to other macOS browser routers.
+      </p>
+    </div>
+
+    <ul class="mt-12 divide-y divide-[color:var(--color-line)] overflow-hidden rounded-xl border border-[color:var(--color-line)] bg-[color:var(--color-bg-soft)]">
+      {faqEntries.map((entry, i) => (
+        <li>
+          <details class="group" open={i === 0}>
+            <summary
+              class="flex cursor-pointer list-none items-center justify-between gap-6 px-6 py-5 text-left text-base font-medium text-[color:var(--color-fg)] transition hover:bg-[color:var(--color-bg)]"
+            >
+              <span>{entry.question}</span>
+              <span
+                aria-hidden="true"
+                class="grid h-6 w-6 shrink-0 place-items-center rounded-full border border-[color:var(--color-line)] text-[color:var(--color-fg-mute)] transition group-open:rotate-45 group-open:text-[color:var(--color-fg)]"
+              >
+                <svg viewBox="0 0 16 16" class="h-3 w-3" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round">
+                  <path d="M8 3v10M3 8h10" />
+                </svg>
+              </span>
+            </summary>
+            <div
+              class="prose-faq px-6 pb-6 text-sm leading-relaxed text-[color:var(--color-fg-soft)]"
+              set:html={entry.answerHtml}
+            />
+          </details>
+        </li>
+      ))}
+    </ul>
+
+    <p class="mt-8 text-sm text-[color:var(--color-fg-soft)]">
+      More questions? Open an issue on
+      <a
+        href="https://github.com/jmanuelrosa/triage/issues"
+        class="underline decoration-[color:var(--color-line)] underline-offset-4 transition hover:text-[color:var(--color-fg)] hover:decoration-[color:var(--color-fg-mute)]"
+        >GitHub</a
+      >.
+    </p>
+  </div>
+</section>
+
+<style>
+  .prose-faq :global(a) {
+    color: var(--color-fg);
+    text-decoration: underline;
+    text-decoration-color: var(--color-line);
+    text-underline-offset: 4px;
+    transition: text-decoration-color 150ms ease;
+  }
+  .prose-faq :global(a:hover) {
+    text-decoration-color: var(--color-fg-mute);
+  }
+  .prose-faq :global(code) {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Cascadia Code", monospace;
+    font-size: 0.85em;
+    color: var(--color-fg);
+    background: var(--color-bg);
+    border: 1px solid var(--color-line);
+    border-radius: 4px;
+    padding: 0.1rem 0.35rem;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+</style>

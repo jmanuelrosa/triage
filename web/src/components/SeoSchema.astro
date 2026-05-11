@@ -1,0 +1,90 @@
+---
+import { faqEntries } from "../data/faq.ts";
+
+interface Props {
+  canonical: string;
+  ogImageUrl: string;
+  description: string;
+}
+
+const { canonical, ogImageUrl, description } = Astro.props;
+
+const repoUrl = "https://github.com/jmanuelrosa/triage";
+
+const author = {
+  "@type": "Person",
+  name: "José Manuel Rosa Moncayo",
+  url: "https://github.com/jmanuelrosa",
+};
+
+const softwareApplication = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "Triage",
+  alternateName: "Triage for macOS",
+  applicationCategory: "UtilitiesApplication",
+  applicationSubCategory: "Browser router",
+  operatingSystem: "macOS 13+",
+  processorRequirements: "Apple Silicon or Intel (Universal binary)",
+  url: canonical,
+  sameAs: [repoUrl],
+  downloadUrl: `${repoUrl}/releases/latest`,
+  installUrl: `${repoUrl}#install`,
+  softwareVersion: "beta",
+  license: `${repoUrl}/blob/main/LICENSE`,
+  isAccessibleForFree: true,
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "USD",
+    availability: "https://schema.org/InStock",
+  },
+  author,
+  creator: author,
+  maintainer: author,
+  description,
+  featureList: [
+    "Rule-based URL routing via YAML",
+    "First-class Chrome profile resolution",
+    "Source-app aware matching (Slack, WhatsApp, etc.)",
+    "Live config reload on save",
+    "Silent fallback to previous default browser",
+    "Native Swift, ~500 lines, no Electron",
+  ],
+  screenshot: ogImageUrl,
+  image: ogImageUrl,
+  keywords:
+    "macOS, browser router, Chrome profiles, YAML, default browser, Velja alternative, Finicky alternative, Browserosaurus alternative, Choosy alternative, open source",
+};
+
+const website = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "Triage",
+  url: canonical,
+  description,
+  inLanguage: "en",
+  publisher: author,
+};
+
+const faqPage = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqEntries.map((entry) => ({
+    "@type": "Question",
+    name: entry.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: entry.answerHtml,
+    },
+  })),
+};
+---
+
+<script
+  is:inline
+  type="application/ld+json"
+  set:html={JSON.stringify(softwareApplication)}
+/>
+<script is:inline type="application/ld+json" set:html={JSON.stringify(website)} />
+<script is:inline type="application/ld+json" set:html={JSON.stringify(faqPage)} />

@@ -6,18 +6,24 @@
   "scripts": {
     "dev": "astro dev",
     "start": "astro dev",
+    "prebuild": "node scripts/generate-og.mjs",
     "build": "astro build",
     "preview": "astro preview",
     "check": "astro check",
+    "og": "node scripts/generate-og.mjs",
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^6.1.6",
+    "@astrojs/sitemap": "^3.2.1",
     "@tailwindcss/vite": "^4.0.0",
+    "astro": "^5.0.0",
     "tailwindcss": "^4.0.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.4",
+    "@fontsource/inter": "^5.2.8",
+    "@resvg/resvg-js": "^2.6.2",
+    "satori": "^0.12.1",
     "typescript": "^5.7.2"
   }
 }
