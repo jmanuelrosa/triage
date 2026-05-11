@@ -7,16 +7,46 @@ on:
     branches: [main]
   workflow_dispatch:
 
-# Cancel superseded runs when new commits land on the same PR / branch.
+# Cancel superseded runs on the same PR / branch. Keying on PR number (when
+# present) keeps a push-to-main from cancelling the PR run that produced it.
 concurrency:
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
 permissions:
   contents: read
 
 jobs:
+  # Detect which areas of the repo changed so we only spin up macos-14 when
+  # Swift code is touched. A job skipped via `if:` reports as success to
+  # branch protection, so required checks still resolve on docs/web-only PRs.
+  changes:
+    runs-on: ubuntu-latest
+    outputs:
+      app: ${{ steps.filter.outputs.app }}
+      web: ${{ steps.filter.outputs.web }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            app:
+              - 'Sources/**'
+              - 'Tests/**'
+              - 'Resources/**'
+              - 'Scripts/**'
+              - 'Package.swift'
+              - 'Package.resolved'
+              - '.github/workflows/ci.yml'
+            web:
+              - 'web/**'
+              - '.github/workflows/ci.yml'
+
   test:
+    needs: changes
+    if: needs.changes.outputs.app == 'true' || github.event_name == 'workflow_dispatch'
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v6
@@ -55,3 +85,29 @@ jobs:
           ./Triage.app/Contents/MacOS/triage --help 2>&1 || true
           file Triage.app/Contents/MacOS/triage
           codesign --verify --verbose Triage.app
+
+  web-check:
+    needs: changes
+    if: needs.changes.outputs.web == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+
+      - name: Install dependencies
+        working-directory: ./web
+        run: npm ci
+
+      - name: Type-check (astro check)
+        working-directory: ./web
+        run: npm run check
+
+      - name: Build site
+        working-directory: ./web
+        run: npm run build
