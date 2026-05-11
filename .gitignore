@@ -7,9 +7,6 @@
 
 # Built app bundle (rebuild via Scripts/build.sh)
 Triage.app/
-openwith.app/
-poc/openwith-poc.app/
-poc/openwith-poc
 
 # Logs
 *.log
