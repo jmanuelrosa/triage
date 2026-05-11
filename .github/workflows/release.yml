@@ -12,11 +12,17 @@ on:
 permissions:
   contents: write
 
+# Never cancel a release mid-flight; just prevent a tag push and a manual
+# workflow_dispatch for the same version from racing each other.
+concurrency:
+  group: release-${{ github.event.inputs.tag || github.ref }}
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: macos-14
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Resolve version from tag
         run: |
@@ -76,7 +82,7 @@ jobs:
         run: shasum -a 256 "Triage-${VERSION}.zip" "Triage-${VERSION}.dmg" > SHA256SUMS.txt
 
       - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: ${{ env.TAG }}
           name: Triage ${{ env.TAG }}

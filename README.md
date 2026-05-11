@@ -39,7 +39,7 @@ There are several good tools in this space. Triage exists to fill a specific nic
 | [Finicky][finicky]           | ❌ Rules only          | ✅ Swift + JSCore   | ✅                | Free  | Rule-based, native — but you write rules in JavaScript    |
 | [Choosy][choosy]             | Configurable          | ✅                  | ✅                | $12   | Rule-based, native, GUI-configured, paid                  |
 
-[velja]: https://github.com/sindresorhus/Velja
+[velja]: https://sindresorhus.com/velja
 [browserosaurus]: https://browserosaurus.com/
 [finicky]: https://github.com/johnste/finicky
 [choosy]: https://www.choosyosx.com/

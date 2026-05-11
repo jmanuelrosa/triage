@@ -1,6 +1,7 @@
 ---
 const repoUrl = "https://github.com/jmanuelrosa/triage";
 const year = new Date().getFullYear();
+const buildDate = typeof __BUILD_DATE__ === "string" ? __BUILD_DATE__ : new Date().toISOString().slice(0, 10);
 ---
 
 <footer class="border-t border-[color:var(--color-line)]">
@@ -17,14 +18,25 @@ const year = new Date().getFullYear();
           <code class="font-mono text-[color:var(--color-fg-soft)]">./Scripts/build.sh</code>.
           Tested on macOS 13+, Apple Silicon.
         </p>
+        <address class="mt-3 not-italic text-xs text-[color:var(--color-fg-mute)]">
+          Built by
+          <a
+            rel="author noopener"
+            href="https://github.com/jmanuelrosa"
+            class="text-[color:var(--color-fg-soft)] underline decoration-[color:var(--color-line)] underline-offset-4 transition hover:text-[color:var(--color-fg)] hover:decoration-[color:var(--color-fg-mute)]"
+          >
+            José Manuel Rosa Moncayo
+          </a>
+          · Last updated <time datetime={buildDate}>{buildDate}</time>
+        </address>
       </div>
 
       <nav class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-        <a href={repoUrl} class="text-[color:var(--color-fg-soft)] transition hover:text-[color:var(--color-fg)]">GitHub</a>
-        <a href={`${repoUrl}/blob/main/README.md`} class="text-[color:var(--color-fg-soft)] transition hover:text-[color:var(--color-fg)]">README</a>
-        <a href={`${repoUrl}/blob/main/config.example.yaml`} class="text-[color:var(--color-fg-soft)] transition hover:text-[color:var(--color-fg)]">Example config</a>
-        <a href={`${repoUrl}/issues`} class="text-[color:var(--color-fg-soft)] transition hover:text-[color:var(--color-fg)]">Issues</a>
-        <a href={`${repoUrl}/blob/main/LICENSE`} class="text-[color:var(--color-fg-soft)] transition hover:text-[color:var(--color-fg)]">MIT</a>
+        <a rel="noopener" href={repoUrl} class="text-[color:var(--color-fg-soft)] transition hover:text-[color:var(--color-fg)]">GitHub</a>
+        <a rel="noopener" href={`${repoUrl}/blob/main/README.md`} class="text-[color:var(--color-fg-soft)] transition hover:text-[color:var(--color-fg)]">README</a>
+        <a rel="noopener" href={`${repoUrl}/blob/main/config.example.yaml`} class="text-[color:var(--color-fg-soft)] transition hover:text-[color:var(--color-fg)]">Example config</a>
+        <a rel="noopener" href={`${repoUrl}/issues`} class="text-[color:var(--color-fg-soft)] transition hover:text-[color:var(--color-fg)]">Issues</a>
+        <a rel="noopener" href={`${repoUrl}/blob/main/LICENSE`} class="text-[color:var(--color-fg-soft)] transition hover:text-[color:var(--color-fg)]">MIT</a>
       </nav>
     </div>
 
