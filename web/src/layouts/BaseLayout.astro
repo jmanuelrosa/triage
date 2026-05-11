@@ -24,8 +24,7 @@ const canonical = new URL(Astro.url.pathname, site).toString();
 const ogImageUrl = new URL(ogImage, canonical).toString();
 
 const umamiWebsiteId = import.meta.env.PUBLIC_UMAMI_WEBSITE_ID;
-const umamiScriptUrl =
-  import.meta.env.PUBLIC_UMAMI_SCRIPT_URL ?? "https://cloud.umami.is/script.js";
+const umamiScriptUrl = "https://cloud.umami.is/script.js";
 const umamiOrigin = new URL(umamiScriptUrl).origin;
 ---
 
