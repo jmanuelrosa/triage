@@ -25,7 +25,7 @@ Triage is pre-1.0. Only the **latest released version** receives security fixes.
 
 Use [GitHub Security Advisories](https://github.com/jmanuelrosa/triage/security/advisories/new) — the *Report a vulnerability* button on the *Security* tab. That gives us a private channel to triage and coordinate disclosure.
 
-If GitHub Security Advisories isn't an option for you, email **jose.moncayo@didomi.io** with `[triage security]` in the subject line.
+If GitHub Security Advisories isn't an option for you, email **josemanuel.rosamoncayo+github@gmail.com** with `[triage security]` in the subject line.
 
 In the report, please include:
 
