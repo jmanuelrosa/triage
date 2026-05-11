@@ -81,8 +81,9 @@ jobs:
         run: |
           # Sanity-check that codesign + bundle layout produced a runnable binary.
           # We can't actually exercise the menu bar / Apple Events on a runner,
-          # but we can at least confirm the binary loads.
-          ./Triage.app/Contents/MacOS/triage --help 2>&1 || true
+          # but we can at least confirm the binary loads. The binary has no
+          # --help flag and will start the event loop and hang, so cap it.
+          timeout 5 ./Triage.app/Contents/MacOS/triage --help 2>&1 || true
           file Triage.app/Contents/MacOS/triage
           codesign --verify --verbose Triage.app
 
