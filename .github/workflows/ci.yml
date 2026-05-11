@@ -27,7 +27,7 @@ jobs:
           xcodebuild -version
 
       - name: Cache SwiftPM artifacts
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~/Library/Caches/org.swift.swiftpm
