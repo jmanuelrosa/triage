@@ -8,7 +8,7 @@ let package = Package(
         .package(url: "https://github.com/jpsim/Yams.git", from: "6.2.1"),
         // swift-testing is bundled with full Xcode but not with Command Line Tools,
         // so we declare it as an explicit dependency for CLT-only setups.
-        .package(url: "https://github.com/swiftlang/swift-testing.git", from: "0.10.0")
+        .package(url: "https://github.com/swiftlang/swift-testing.git", from: "6.3.1")
     ],
     targets: [
         .target(
