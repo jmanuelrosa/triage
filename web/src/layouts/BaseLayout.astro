@@ -1,21 +1,31 @@
 ---
 import "../styles/global.css";
+import SeoSchema from "../components/SeoSchema.astro";
 
 interface Props {
   title?: string;
   description?: string;
+  ogImage?: string;
+  ogImageAlt?: string;
+  noindex?: boolean;
 }
 
 const {
-  title = "Triage — rule-based URL routing for macOS",
-  description = "A native macOS menu-bar app that silently routes every clicked link to the right browser — and the right Chrome profile — based on rules you write in a YAML file.",
+  title = "Triage — Open-source URL & Chrome profile router for macOS",
+  description = "Open-source macOS menu-bar app that routes every clicked link to the right browser and Chrome profile, driven by a simple YAML config. Free, native Swift, no Electron.",
+  ogImage = "og.png",
+  ogImageAlt = "Triage — rule-based URL routing for macOS. YAML configuration on a dark background.",
+  noindex = false,
 } = Astro.props;
 
-const siteUrl = Astro.site ? new URL(Astro.url.pathname, Astro.site).toString() : "";
+const site = Astro.site ?? new URL("https://jmanuelrosa.github.io/triage/");
+const canonical = new URL(Astro.url.pathname, site).toString();
+// Resolve relative paths (like "og.png") against the canonical so the `base` path is preserved.
+const ogImageUrl = new URL(ogImage, canonical).toString();
 
 const umamiWebsiteId = import.meta.env.PUBLIC_UMAMI_WEBSITE_ID;
-const umamiScriptUrl =
-  import.meta.env.PUBLIC_UMAMI_SCRIPT_URL ?? "https://cloud.umami.is/script.js";
+const umamiScriptUrl = "https://cloud.umami.is/script.js";
+const umamiOrigin = new URL(umamiScriptUrl).origin;
 ---
 
 <!doctype html>
@@ -27,27 +37,44 @@ const umamiScriptUrl =
 
     <title>{title}</title>
     <meta name="description" content={description} />
+    <meta name="author" content="José Manuel Rosa Moncayo" />
     <meta name="color-scheme" content="dark" />
     <meta name="theme-color" content="#0a0a0c" />
+    {noindex && <meta name="robots" content="noindex,nofollow" />}
 
+    <link rel="canonical" href={canonical} />
     <link rel="icon" type="image/svg+xml" href={`${import.meta.env.BASE_URL}favicon.svg`} />
 
     <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Triage" />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
-    {siteUrl && <meta property="og:url" content={siteUrl} />}
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={ogImageAlt} />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+    <meta name="twitter:image:alt" content={ogImageAlt} />
+
+    <SeoSchema canonical={canonical} ogImageUrl={ogImageUrl} description={description} />
 
     {umamiWebsiteId && (
-      <script
-        is:inline
-        defer
-        src={umamiScriptUrl}
-        data-website-id={umamiWebsiteId}
-      />
+      <>
+        <link rel="dns-prefetch" href={umamiOrigin} />
+        <link rel="preconnect" href={umamiOrigin} crossorigin />
+        <script
+          is:inline
+          defer
+          src={umamiScriptUrl}
+          data-website-id={umamiWebsiteId}
+        />
+      </>
     )}
   </head>
   <body>

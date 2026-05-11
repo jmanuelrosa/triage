@@ -37,7 +37,7 @@ Validate the assumptions that could kill the architecture before writing real co
   - `Profile 8` → 3bitslost
   - `Profile 9` → aoiTo
 
-  *Open question (still unresolved):* No Didomi work profile in this list — needs clarification before Phase 1 YAML rules can target the work flow.
+  *Open question (still unresolved):* No work profile in this list — needs clarification before Phase 1 YAML rules can target the work flow.
 
 ---
 
@@ -63,7 +63,7 @@ Build inside-out: pure logic first (testable), then I/O, then UI.
 - [x] `ChromeProfileResolver.swift` ✅ 2026-05-08 — parses Chrome's `Local State` JSON; maps friendly profile names → directory names. Passthrough for unknown values (so `"Profile 4"` and `"Default"` work as escape hatches). Duplicate display names handled deterministically (first-by-directory-key). 12 tests in `ChromeProfileResolverTests`.
 - [x] `State.swift` ✅ 2026-05-08 — `fallback-browser.json` Codable (snake_case fields, ISO-8601 dates), `State.load`/`save` with atomic write + parent-directory creation, `defaultURL = ~/.config/triage/fallback-browser.json`. 8 tests in `StateTests`. (File was originally named `state.json`; renamed for clarity 2026-05-09.)
 - [x] `BrowserLauncher.swift` ✅ 2026-05-08 — pure argv builder for `/usr/bin/open`, with/without `--profile-directory`. 8 tests.
-- [x] `URLHandler.swift` ✅ 2026-05-08 — full pipeline: kAEGetURL → MatchContext → RuleMatcher → browser resolution → BrowserLauncher → `Process.run`. Loop protection if a rule/state points back at us. Safari as ultimate fallback when fallback-browser.json is missing. Validated end-to-end with Slack → GitHub addingwell URL → Helium.
+- [x] `URLHandler.swift` ✅ 2026-05-08 — full pipeline: kAEGetURL → MatchContext → RuleMatcher → browser resolution → BrowserLauncher → `Process.run`. Loop protection if a rule/state points back at us. Safari as ultimate fallback when fallback-browser.json is missing. Validated end-to-end with Slack → GitHub work-org URL → Helium.
 - [x] `AppDelegate.swift` slimmed to AE handler bootstrap + delegation to `URLHandler`. Status bar / menu still pending (next slice).
 - [x] `config.example.yaml` ✅ 2026-05-08 — committed plan example as a starting template.
 - [x] AppDelegate menu (status bar item, *Reload Config*, *Open Config File*, *Set Fallback Browser →*, *Quit*) ✅ 2026-05-08

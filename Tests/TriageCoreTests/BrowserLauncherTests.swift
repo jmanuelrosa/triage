@@ -44,7 +44,7 @@ struct BrowserLauncherTests {
         let chromeDev = Browser(bundleID: "com.google.Chrome", profile: "Jose Manuel [Dev]")
         let args = BrowserLauncher.argv(
             for: chromeDev,
-            url: "https://app.didomi.io/dashboard",
+            url: "https://app.acme.io/dashboard",
             profileResolver: Self.resolver
         )
         #expect(args == [
@@ -54,7 +54,7 @@ struct BrowserLauncherTests {
             "com.google.Chrome",
             "--args",
             "--profile-directory=Profile 4",
-            "https://app.didomi.io/dashboard"
+            "https://app.acme.io/dashboard"
         ])
     }
 

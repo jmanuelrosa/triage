@@ -9,16 +9,23 @@ const repoUrl = "https://github.com/jmanuelrosa/triage";
       <span>macOS · beta · open source</span>
     </div>
 
-    <h1 class="mt-6 text-balance text-5xl font-semibold leading-[1.05] tracking-tight sm:text-6xl md:text-7xl">
+    <h1
+      aria-describedby="hero-tagline"
+      class="mt-6 text-balance text-5xl font-semibold leading-[1.05] tracking-tight sm:text-6xl md:text-7xl"
+    >
       Rule-based,<br class="hidden sm:block" />
       <span class="bg-gradient-to-r from-[color:var(--color-accent)] via-[color:var(--color-accent-3)] to-[color:var(--color-accent-2)] bg-clip-text text-transparent">
         never asks.
       </span>
     </h1>
 
-    <p class="mt-7 max-w-2xl text-lg leading-relaxed text-[color:var(--color-fg-soft)] sm:text-xl">
-      A native macOS menu-bar app that silently routes every clicked link to the right
-      browser — and the right Chrome profile — based on rules you write in a YAML file.
+    <p
+      id="hero-tagline"
+      class="mt-7 max-w-2xl text-lg leading-relaxed text-[color:var(--color-fg-soft)] sm:text-xl"
+    >
+      Triage is a native macOS menu-bar app that silently routes every clicked link to
+      the right browser — and the right Chrome profile — based on rules you write in a
+      YAML file.
     </p>
 
     <p class="mt-3 max-w-2xl text-sm text-[color:var(--color-fg-mute)]">

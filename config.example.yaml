@@ -14,7 +14,7 @@
 
 browsers:
   helium:
-    bundle_id: net.imput.helium                # work / Didomi
+    bundle_id: net.imput.helium                # work / Acme
   chrome_personal:
     bundle_id: com.google.Chrome
     profile: "Jose Manuel"                     # → Default
@@ -26,18 +26,18 @@ browsers:
     profile: "3bitslost"                       # → Profile 8
 
 rules:
-  # Work — anything Didomi-related goes to Helium regardless of source
-  - host: "*.didomi.io"
+  # Work — anything Acme-related goes to Helium regardless of source
+  - host: "*.acme.io"
     browser: helium
-  - host: "*.addingwell.com"
+  - host: "*.globex.com"
     browser: helium
   - host: gitlab.com
-    path: "/didomi/*"
+    path: "/acme/*"
     browser: helium
 
   # GitHub orgs — same host, different routing by path
   - host: github.com
-    path: "/addingwell/*"
+    path: "/globex/*"
     browser: helium
   - host: github.com
     path: "/3bitslost-team/*"

@@ -180,15 +180,15 @@ struct ConfigTests {
             profile: "3bitslost"
 
         rules:
-          - host: "*.didomi.io"
+          - host: "*.acme.io"
             browser: helium
-          - host: "*.addingwell.com"
+          - host: "*.globex.com"
             browser: helium
           - host: gitlab.com
-            path: "/didomi/*"
+            path: "/acme/*"
             browser: helium
           - host: github.com
-            path: "/addingwell/*"
+            path: "/globex/*"
             browser: helium
           - host: github.com
             path: "/3bitslost-team/*"
