@@ -5,10 +5,7 @@ let package = Package(
     name: "triage",
     platforms: [.macOS(.v13)],
     dependencies: [
-        .package(url: "https://github.com/jpsim/Yams.git", from: "6.2.1"),
-        // swift-testing is bundled with full Xcode but not with Command Line Tools,
-        // so we declare it as an explicit dependency for CLT-only setups.
-        .package(url: "https://github.com/swiftlang/swift-testing.git", from: "6.3.1")
+        .package(url: "https://github.com/jpsim/Yams.git", from: "6.2.1")
     ],
     targets: [
         .target(
@@ -23,14 +20,11 @@ let package = Package(
         ),
         .testTarget(
             name: "TriageCoreTests",
-            dependencies: [
-                "TriageCore",
-                .product(name: "Testing", package: "swift-testing")
-            ]
+            dependencies: ["TriageCore"]
         )
     ],
     // Keep Swift 5 language mode under the Swift 6.2 toolchain. The toolchain
-    // bump is needed for swift-testing 6.3.1; the strict-concurrency migration
-    // is tracked separately.
+    // bump is needed so `import Testing` resolves against the bundled
+    // swift-testing; the strict-concurrency migration is tracked separately.
     swiftLanguageModes: [.v5]
 )
