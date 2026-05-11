@@ -28,5 +28,9 @@ let package = Package(
                 .product(name: "Testing", package: "swift-testing")
             ]
         )
-    ]
+    ],
+    // Keep Swift 5 language mode under the Swift 6.2 toolchain. The toolchain
+    // bump is needed for swift-testing 6.3.1; the strict-concurrency migration
+    // is tracked separately.
+    swiftLanguageModes: [.v5]
 )
