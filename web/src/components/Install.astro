@@ -1,0 +1,121 @@
+---
+const commands = [
+  {
+    title: "Homebrew",
+    badge: "Recommended",
+    body: "Cask install. Auto-updates with brew upgrade --cask triage. Strips the Gatekeeper quarantine for you.",
+    cmd: "brew install --cask jmanuelrosa/triage/triage",
+    highlight: true,
+  },
+  {
+    title: "Install script",
+    body: "Curl it, inspect it, run it. Downloads the latest release, copies Triage.app to /Applications, registers it with LaunchServices.",
+    cmd: "curl -fsSL https://raw.githubusercontent.com/jmanuelrosa/triage/main/Scripts/install.sh | bash",
+    highlight: false,
+  },
+];
+
+const repoUrl = "https://github.com/jmanuelrosa/triage";
+const releasesUrl = `${repoUrl}/releases/latest`;
+const buildFromSourceUrl = `${repoUrl}#option-4-build-from-source`;
+---
+
+<section id="install" class="relative">
+  <div class="mx-auto max-w-5xl px-6 py-20 sm:py-24">
+    <div class="max-w-2xl">
+      <p class="text-xs uppercase tracking-widest text-[color:var(--color-accent)]">Install</p>
+      <h2 class="mt-3 text-3xl font-semibold tracking-tight sm:text-4xl">
+        Two paths. Same binary.
+      </h2>
+      <p class="mt-4 text-[color:var(--color-fg-soft)]">
+        macOS 13 or later. Universal binary — Apple Silicon and Intel. The two paths below
+        handle Gatekeeper for you; no Xcode required.
+      </p>
+    </div>
+
+    <ul class="mt-12 grid gap-5 md:grid-cols-2">
+      {commands.map((c) => (
+        <li
+          class={`relative flex flex-col rounded-xl border bg-[color:var(--color-bg-soft)] p-6 transition ${
+            c.highlight
+              ? "border-[color:var(--color-accent-3)]/50 shadow-lg shadow-black/30"
+              : "border-[color:var(--color-line)] hover:border-[color:var(--color-fg-mute)]"
+          }`}
+        >
+          {c.badge && (
+            <span class="absolute -top-2.5 left-5 inline-flex items-center gap-1.5 rounded-full bg-[color:var(--color-bg)] px-2.5 py-0.5 text-[10px] font-medium uppercase tracking-widest text-[color:var(--color-accent-3)] ring-1 ring-[color:var(--color-accent-3)]/40">
+              <span class="inline-block h-1 w-1 rounded-full bg-[color:var(--color-accent-3)]"></span>
+              {c.badge}
+            </span>
+          )}
+
+          <h3 class="text-lg font-medium text-[color:var(--color-fg)]">{c.title}</h3>
+          <p class="mt-2 text-sm leading-relaxed text-[color:var(--color-fg-soft)]">{c.body}</p>
+
+          <div class="mt-5 flex items-center gap-2 rounded-lg border border-[color:var(--color-line)] bg-[color:var(--color-bg)] px-3 py-2.5 font-mono text-xs">
+            <span class="text-[color:var(--color-accent-3)]" aria-hidden="true">$</span>
+            <code class="flex-1 overflow-x-auto whitespace-nowrap text-[color:var(--color-fg)]">{c.cmd}</code>
+            <button
+              type="button"
+              class="copy-btn shrink-0 rounded-md border border-[color:var(--color-line)] bg-[color:var(--color-bg-soft)] p-1.5 text-[color:var(--color-fg-mute)] transition hover:border-[color:var(--color-fg-mute)] hover:text-[color:var(--color-fg)]"
+              data-copy={c.cmd}
+              aria-label={`Copy ${c.title} command`}
+            >
+              <svg viewBox="0 0 16 16" class="copy-icon h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="5" y="5" width="9" height="9" rx="1.5" />
+                <path d="M3 11V3a1 1 0 0 1 1-1h7" />
+              </svg>
+              <svg viewBox="0 0 16 16" class="check-icon hidden h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="m3 8 3.5 3.5L13 5" />
+              </svg>
+            </button>
+          </div>
+        </li>
+      ))}
+    </ul>
+
+    <div class="mt-10 flex flex-wrap items-center justify-between gap-4 text-sm">
+      <p class="text-[color:var(--color-fg-soft)]">
+        Also available:
+        <a
+          href={releasesUrl}
+          class="underline decoration-[color:var(--color-line)] underline-offset-4 transition hover:text-[color:var(--color-fg)] hover:decoration-[color:var(--color-fg-mute)]"
+        >
+          DMG download
+        </a>
+        <span class="text-[color:var(--color-fg-mute)]">·</span>
+        <a
+          href={buildFromSourceUrl}
+          class="underline decoration-[color:var(--color-line)] underline-offset-4 transition hover:text-[color:var(--color-fg)] hover:decoration-[color:var(--color-fg-mute)]"
+        >
+          build from source
+        </a>
+      </p>
+      <p class="text-xs text-[color:var(--color-fg-mute)]">
+        Unsigned beta — DMG users right-click Triage.app → Open the first time.
+      </p>
+    </div>
+  </div>
+</section>
+
+<script>
+  for (const btn of document.querySelectorAll<HTMLButtonElement>(".copy-btn")) {
+    btn.addEventListener("click", async () => {
+      const text = btn.dataset.copy ?? "";
+      try {
+        await navigator.clipboard.writeText(text);
+      } catch {
+        return;
+      }
+      const copy = btn.querySelector<SVGElement>(".copy-icon");
+      const check = btn.querySelector<SVGElement>(".check-icon");
+      if (!copy || !check) return;
+      copy.classList.add("hidden");
+      check.classList.remove("hidden");
+      window.setTimeout(() => {
+        copy.classList.remove("hidden");
+        check.classList.add("hidden");
+      }, 1400);
+    });
+  }
+</script>
