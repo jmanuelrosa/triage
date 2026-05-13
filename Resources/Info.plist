@@ -2,60 +2,50 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-    <key>CFBundleIdentifier</key>
-    <string>com.jmrosamoncayo.triage</string>
-    <key>CFBundleName</key>
-    <string>Triage</string>
-    <key>CFBundleDisplayName</key>
-    <string>Triage</string>
-    <key>CFBundleExecutable</key>
-    <string>triage</string>
-    <key>CFBundlePackageType</key>
-    <string>APPL</string>
-    <key>CFBundleVersion</key>
-    <string>1</string>
-    <key>CFBundleShortVersionString</key>
-    <string>0.1.0</string>
-    <key>LSMinimumSystemVersion</key>
-    <string>13.0</string>
-    <!-- Hide from Dock and Cmd-Tab. Runtime setActivationPolicy(.accessory)
-         alone leaves a ~half-second flash because LaunchServices decides Dock
-         presence from the static plist before our policy call lands.
-         Re-tested 2026-05-10: with CFBundleDocumentTypes for public.html
-         present (below), LSUIElement=true does NOT remove us from the System
-         Settings → Default web browser picker — contradicting the Phase 0
-         spike. Velja / Choosy / Finicky all ship with this combination. -->
-    <key>LSUIElement</key>
-    <true/>
-    <key>NSPrincipalClass</key>
-    <string>NSApplication</string>
-    <key>CFBundleURLTypes</key>
-    <array>
-        <dict>
-            <key>CFBundleURLName</key>
-            <string>Web site URL</string>
-            <key>CFBundleURLSchemes</key>
-            <array>
-                <string>http</string>
-                <string>https</string>
-            </array>
-        </dict>
-    </array>
-    <!-- Declaring ourselves as an HTML viewer is what macOS uses to distinguish
-         a "web browser" (eligible for the Default Browser picker) from "an app
-         that just happens to handle http URLs". Chrome/Safari/Helium all do this. -->
-    <key>CFBundleDocumentTypes</key>
-    <array>
-        <dict>
-            <key>CFBundleTypeRole</key>
-            <string>Viewer</string>
-            <key>LSItemContentTypes</key>
-            <array>
-                <string>public.html</string>
-                <string>public.xhtml</string>
-                <string>public.url</string>
-            </array>
-        </dict>
-    </array>
+	<key>CFBundleDisplayName</key>
+	<string>Triage</string>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Viewer</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>public.html</string>
+				<string>public.xhtml</string>
+				<string>public.url</string>
+			</array>
+		</dict>
+	</array>
+	<key>CFBundleExecutable</key>
+	<string>triage</string>
+	<key>CFBundleIdentifier</key>
+	<string>com.jmrosamoncayo.triage</string>
+	<key>CFBundleName</key>
+	<string>Triage</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>CFBundleShortVersionString</key>
+	<string>0.1.0</string>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>Web site URL</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>http</string>
+				<string>https</string>
+			</array>
+		</dict>
+	</array>
+	<key>CFBundleVersion</key>
+	<string>2</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>13.0</string>
+	<key>LSUIElement</key>
+	<true/>
+	<key>NSPrincipalClass</key>
+	<string>NSApplication</string>
 </dict>
 </plist>
