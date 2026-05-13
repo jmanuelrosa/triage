@@ -7,7 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-<!-- New entries go here under one of: Added / Changed / Deprecated / Removed / Fixed / Security. -->
+### Added
+- Status-bar menu item *Set as Default Web Browser* — calls `NSWorkspace.setDefaultApplication` for `http`/`https`. macOS shows its own confirmation dialog. Relabels to *Triage is the Default Web Browser* (greyed) once the role is held, refreshed on every menu open so System Settings changes show up without restart.
+- Status-bar menu item *Launch at Login* — toggles `SMAppService.mainApp` registration. `.requiresApproval` and `.notFound` (app outside `/Applications`) surface an alert with a deep-link button into the relevant System Settings pane.
+
+### Changed
+- README install instructions point at the new menu items instead of *System Settings → Desktop & Dock*; the troubleshooting section now suggests checking the menu before reaching for `plutil`.
 
 ## [0.1.0] — Initial public beta
 
