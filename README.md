@@ -145,9 +145,13 @@ Requires Xcode Command Line Tools (`xcode-select --install`); the full Xcode is 
 
 ### After installing — set as default browser
 
-**System Settings → Desktop & Dock → Default web browser → Triage**.
+Click Triage's menu bar icon (top-right) → *Set as Default Web Browser*. macOS will pop a confirmation dialog asking *"Do you want to use 'Triage' as your default web browser?"* — click **Use 'Triage'**. The menu item then changes to *Triage is the Default Web Browser*.
 
-Then click Triage's menu bar icon (top-right) → *Open Config File* — the empty template is created at `~/.config/triage/config.yaml`. Edit it; Triage reloads on save.
+(You can still do it the long way via *System Settings → Desktop & Dock → Default web browser → Triage* if you prefer.)
+
+While you're in the menu, *Launch at Login* keeps Triage running across reboots without you having to launch it by hand.
+
+Then click *Open Config File* — the empty template is created at `~/.config/triage/config.yaml`. Edit it; Triage reloads on save.
 
 ## ⚙️ Configuration
 
@@ -171,14 +175,16 @@ Click the URL again; you'll see the matched rule (or "no rule matched, using fal
 
 **Triage isn't catching URLs at all**
 
-Verify it's the system default:
+Open the menu bar icon — if it shows *Set as Default Web Browser* (instead of *Triage is the Default Web Browser*), it isn't the system default yet. Click that item and confirm the macOS dialog.
+
+If you'd rather verify from the shell:
 
 ```bash
 plutil -p ~/Library/Preferences/com.apple.LaunchServices/com.apple.launchservices.secure.plist \
   | grep -A1 LSHandlerURLScheme | grep -B1 -A2 'http[s]\?'
 ```
 
-You should see `com.jmrosamoncayo.triage` next to `http`/`https`. If not, redo *System Settings → Default web browser → Triage*.
+You should see `com.jmrosamoncayo.triage` next to `http`/`https`.
 
 **Config error alert keeps popping up**
 

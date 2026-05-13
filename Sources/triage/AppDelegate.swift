@@ -1,4 +1,5 @@
 import AppKit
+import ServiceManagement
 import TriageCore
 import OSLog
 
@@ -9,6 +10,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var statusItem: NSStatusItem?
     private var configWatcher: ConfigWatcher?
     private var firstRunResult: FirstRunSetup.CaptureResult = .alreadyHadState
+    private var defaultBrowserItem: NSMenuItem?
+    private var loginItem: NSMenuItem?
 
     // Register here, NOT in applicationDidFinishLaunching: when macOS cold-launches
     // us in response to a URL click, the kAEGetURL event is delivered between
@@ -113,12 +116,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             accessibilityDescription: "Triage"
         )
         item.button?.image = icon
-        item.menu = buildMenu()
+        let menu = buildMenu()
+        menu.delegate = self
+        item.menu = menu
         statusItem = item
     }
 
     private func buildMenu() -> NSMenu {
         let menu = NSMenu()
+        // `refreshDynamicMenuItems` is the single source of truth for the
+        // dynamic items' enabled state — disable AppKit's auto-validation so
+        // our explicit `isEnabled` assignments survive each menu-open cycle.
+        menu.autoenablesItems = false
 
         let reload = NSMenuItem(
             title: "Reload Config",
@@ -144,6 +153,28 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         menu.addItem(.separator())
 
+        let defaultBrowser = NSMenuItem(
+            title: "Set as Default Web Browser",
+            action: #selector(toggleDefaultBrowser(_:)),
+            keyEquivalent: ""
+        )
+        defaultBrowser.target = self
+        menu.addItem(defaultBrowser)
+        defaultBrowserItem = defaultBrowser
+
+        let login = NSMenuItem(
+            title: "Launch at Login",
+            action: #selector(toggleLaunchAtLogin(_:)),
+            keyEquivalent: ""
+        )
+        login.target = self
+        menu.addItem(login)
+        loginItem = login
+
+        refreshDynamicMenuItems()
+
+        menu.addItem(.separator())
+
         let quit = NSMenuItem(
             title: "Quit Triage",
             action: #selector(NSApplication.terminate(_:)),
@@ -152,6 +183,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         menu.addItem(quit)
 
         return menu
+    }
+
+    /// Reads live state from LaunchServices / SMAppService and updates the two
+    /// dynamic items in place. Called on every menu open so user changes made
+    /// elsewhere (System Settings → Default web browser, System Settings →
+    /// Login Items) are reflected without restart.
+    private func refreshDynamicMenuItems() {
+        if let item = defaultBrowserItem {
+            let isDefault = DefaultBrowser.isCurrentDefault()
+            item.title = isDefault
+                ? "Triage is the Default Web Browser"
+                : "Set as Default Web Browser"
+            item.isEnabled = !isDefault
+        }
+        if let item = loginItem {
+            item.state = LoginItem.isEnabled ? .on : .off
+        }
     }
 
     private func buildFallbackSubmenu() -> NSMenu {
@@ -229,10 +277,82 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             try state.save(to: State.defaultURL)
             log.info("fallback browser set to \(bundleID, privacy: .public)")
             // Rebuild so the checkmark moves to the new selection.
-            statusItem?.menu = buildMenu()
+            let menu = buildMenu()
+            menu.delegate = self
+            statusItem?.menu = menu
         } catch {
             showAlert(title: "Couldn't save fallback-browser.json", message: "\(error)")
         }
+    }
+
+    @objc private func toggleDefaultBrowser(_ sender: NSMenuItem) {
+        DefaultBrowser.makeDefault { [weak self] result in
+            guard let self else { return }
+            switch result {
+            case .success:
+                log.info("Triage set as default web browser")
+                self.refreshDynamicMenuItems()
+            case .failure(let error):
+                let description = String(describing: error)
+                FileLog.error("could not set default browser: \(description)")
+                log.error("set default browser failed: \(description, privacy: .public)")
+                self.showAlertWithOptionalSettings(
+                    title: "Couldn't set Triage as default browser",
+                    message: """
+                    \(error.localizedDescription)
+
+                    You can set it manually in System Settings → Desktop & Dock → Default web browser.
+                    """,
+                    settingsURL: "x-apple.systempreferences:com.apple.preferences.DesktopAndDock",
+                    settingsButton: "Open System Settings"
+                )
+            }
+        }
+    }
+
+    @objc private func toggleLaunchAtLogin(_ sender: NSMenuItem) {
+        let wasEnabled = LoginItem.isEnabled
+        do {
+            if wasEnabled {
+                try LoginItem.disable()
+                log.info("launch at login disabled")
+            } else {
+                try LoginItem.enable()
+                log.info("launch at login enabled")
+            }
+        } catch {
+            let description = String(describing: error)
+            FileLog.error("toggle launch-at-login failed: \(description)")
+            log.error("toggle launch-at-login failed: \(description, privacy: .public)")
+            showAlert(
+                title: wasEnabled ? "Couldn't disable Launch at Login" : "Couldn't enable Launch at Login",
+                message: error.localizedDescription
+            )
+            refreshDynamicMenuItems()
+            return
+        }
+
+        // SMAppService may end up in `.requiresApproval` (user previously
+        // disabled us in System Settings) or `.notFound` (app isn't in a
+        // recognised location, e.g. running from a dev build folder). Both
+        // surface as a "successful" call that nonetheless didn't enable us.
+        switch LoginItem.status {
+        case .requiresApproval:
+            showAlertWithOptionalSettings(
+                title: "Login item needs your approval",
+                message: "macOS has blocked Triage from launching at login. Enable it in System Settings → General → Login Items & Extensions.",
+                settingsURL: "x-apple.systempreferences:com.apple.LoginItems-Settings.extension",
+                settingsButton: "Open Login Items Settings"
+            )
+        case .notFound:
+            showAlert(
+                title: "Triage isn't in /Applications",
+                message: "macOS only allows apps in /Applications to launch at login. Move Triage there and try again."
+            )
+        default:
+            break
+        }
+        refreshDynamicMenuItems()
     }
 
     private func showAlert(title: String, message: String) {
@@ -241,5 +361,29 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         alert.messageText = title
         alert.informativeText = message
         alert.runModal()
+    }
+
+    private func showAlertWithOptionalSettings(
+        title: String,
+        message: String,
+        settingsURL: String,
+        settingsButton: String
+    ) {
+        NSApp.activate(ignoringOtherApps: true)
+        let alert = NSAlert()
+        alert.messageText = title
+        alert.informativeText = message
+        alert.addButton(withTitle: settingsButton)
+        alert.addButton(withTitle: "Cancel")
+        if alert.runModal() == .alertFirstButtonReturn,
+           let url = URL(string: settingsURL) {
+            NSWorkspace.shared.open(url)
+        }
+    }
+}
+
+extension AppDelegate: NSMenuDelegate {
+    func menuNeedsUpdate(_ menu: NSMenu) {
+        refreshDynamicMenuItems()
     }
 }
