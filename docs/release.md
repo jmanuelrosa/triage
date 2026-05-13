@@ -6,7 +6,7 @@ Tag-driven release pipeline. Pushing a `v*` tag triggers `.github/workflows/rele
 
 Before the first release:
 
-1. **Create the Homebrew tap repo** at `https://github.com/jmanuelrosa/homebrew-triage` (must follow `homebrew-<name>` naming so `brew tap jmanuelrosa/triage` works).
+1. **Create the Homebrew tap repo** at `https://github.com/jmanuelrosa/homebrew-tap` (`homebrew-tap` is the multi-app tap; Homebrew strips the `homebrew-` prefix, so `brew tap jmanuelrosa/tap` resolves it).
 2. Inside it, create `Casks/triage.rb` by copying `Casks/triage.rb` from this repo. The `version` and `sha256` fields are placeholders; you'll fill them on the first real release.
 3. Push the empty tap to GitHub.
 
@@ -55,7 +55,7 @@ Before the first release:
 
    Or just open `SHA256SUMS.txt` from the release page and copy the line for `Triage-0.1.1.zip`.
 
-   In the `homebrew-triage` repo, edit `Casks/triage.rb`:
+   In the `homebrew-tap` repo, edit `Casks/triage.rb`:
 
    ```ruby
    version "0.1.1"
@@ -71,7 +71,7 @@ Before the first release:
    ```sh
    # Path A — Homebrew
    brew uninstall --cask triage 2>/dev/null
-   brew install --cask jmanuelrosa/triage/triage
+   brew install --cask jmanuelrosa/tap/triage
 
    # Path B — curl|bash
    curl -fsSL https://raw.githubusercontent.com/jmanuelrosa/triage/main/Scripts/install.sh | bash
