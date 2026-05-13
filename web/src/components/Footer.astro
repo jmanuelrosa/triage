@@ -14,9 +14,9 @@ const buildDate = typeof __BUILD_DATE__ === "string" ? __BUILD_DATE__ : new Date
           <span class="text-sm text-[color:var(--color-fg-mute)]">— rule-based URL routing for macOS</span>
         </div>
         <p class="mt-2 max-w-md text-xs leading-relaxed text-[color:var(--color-fg-mute)]">
-          Beta. No notarized release yet — build from source via
-          <code class="font-mono text-[color:var(--color-fg-soft)]">./Scripts/build.sh</code>.
-          Tested on macOS 13+, Apple Silicon.
+          v0.1.0 — unsigned beta. Homebrew strips the Gatekeeper
+          quarantine automatically; DMG users right-click on first
+          launch. macOS 13+, Universal binary (Apple Silicon + Intel).
         </p>
         <address class="mt-3 not-italic text-xs text-[color:var(--color-fg-mute)]">
           Built by

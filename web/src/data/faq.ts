@@ -58,6 +58,6 @@ export const faqEntries: FaqEntry[] = [
   {
     question: "Is Triage code-signed and notarized?",
     answerHtml:
-      "Not yet — Triage is currently an unsigned beta. Homebrew users get the quarantine attribute stripped automatically. DMG users need to right-click Triage.app and choose Open the first time. Code signing and notarization are on the roadmap before the 1.0 release.",
+      "Not yet — v0.1.0 ships unsigned. Homebrew users get the quarantine attribute stripped automatically. DMG users need to right-click Triage.app and choose Open the first time. Code signing and notarization are on the roadmap before the 1.0 release.",
   },
 ];
