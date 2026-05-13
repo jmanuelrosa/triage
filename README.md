@@ -95,7 +95,7 @@ Requires macOS 13 or later. Universal binary — runs on both Apple Silicon and 
 ### Option 1: Homebrew (recommended)
 
 ```sh
-brew install --cask jmanuelrosa/triage/triage
+brew install --cask jmanuelrosa/tap/triage
 ```
 
 Updates ride the same channel: `brew upgrade --cask triage` once a new release is out.

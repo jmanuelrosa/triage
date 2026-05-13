@@ -53,7 +53,7 @@ export const faqEntries: FaqEntry[] = [
   {
     question: "How do I install Triage?",
     answerHtml:
-      "Recommended: <code>brew install --cask jmanuelrosa/triage/triage</code>. Homebrew handles the Gatekeeper quarantine and updates via <code>brew upgrade --cask triage</code>. You can also use the curl install script, download the DMG from GitHub Releases, or build from source.",
+      "Recommended: <code>brew install --cask jmanuelrosa/tap/triage</code>. Homebrew handles the Gatekeeper quarantine and updates via <code>brew upgrade --cask triage</code>. You can also use the curl install script, download the DMG from GitHub Releases, or build from source.",
   },
   {
     question: "Is Triage code-signed and notarized?",
