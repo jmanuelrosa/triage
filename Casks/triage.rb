@@ -1,16 +1,17 @@
 # Homebrew Cask formula for Triage.
 #
 # This file lives in the main Triage repo as a copy-paste TEMPLATE. The actual
-# tap that users install from is the separate `homebrew-triage` repo:
+# tap that users install from is the separate `homebrew-tap` repo, which holds
+# casks for all of jmanuelrosa's macOS apps:
 #
-#   https://github.com/jmanuelrosa/homebrew-triage
+#   https://github.com/jmanuelrosa/homebrew-tap
 #
 # Release flow:
 #   1. Tag in this repo, GitHub Actions builds artifacts, attaches to release.
 #   2. Read SHA256 of Triage-<version>.zip from the release's SHA256SUMS.txt.
-#   3. Copy this file to homebrew-triage/Casks/triage.rb, updating `version`
+#   3. Copy this file to homebrew-tap/Casks/triage.rb, updating `version`
 #      and `sha256`. Commit + push.
-#   4. Users: `brew install --cask jmanuelrosa/triage/triage`.
+#   4. Users: `brew install --cask jmanuelrosa/tap/triage`.
 
 cask "triage" do
   version "0.1.0"
