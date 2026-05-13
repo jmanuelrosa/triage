@@ -2,13 +2,11 @@
 
 Tag-driven release pipeline. Pushing a `v*` tag triggers `.github/workflows/release.yml`, which builds a universal `Triage.app`, packages it as a ZIP and DMG, and attaches both to a GitHub Release. Updating the Homebrew tap is the only step the workflow doesn't automate yet.
 
-## One-time setup
+## Tap repo
 
-Before the first release:
+The Homebrew tap lives at [`jmanuelrosa/homebrew-tap`](https://github.com/jmanuelrosa/homebrew-tap) and is the single source of truth for every published cask. Homebrew strips the `homebrew-` prefix, so users run `brew tap jmanuelrosa/tap` and `brew install --cask jmanuelrosa/tap/triage`.
 
-1. **Create the Homebrew tap repo** at `https://github.com/jmanuelrosa/homebrew-tap` (`homebrew-tap` is the multi-app tap; Homebrew strips the `homebrew-` prefix, so `brew tap jmanuelrosa/tap` resolves it).
-2. Inside it, create `Casks/triage.rb` by copying `Casks/triage.rb` from this repo. The `version` and `sha256` fields are placeholders; you'll fill them on the first real release.
-3. Push the empty tap to GitHub.
+The cask for Triage is `homebrew-tap/Casks/triage.rb`. To add a future app, copy the closest existing cask in the tap and adjust `version`, `sha256`, `url`, `name`, and `app` — there is no template in this repo.
 
 ## Per-release steps
 
