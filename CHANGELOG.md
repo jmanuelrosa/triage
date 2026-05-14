@@ -7,12 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] — 2026-05-14
+
 ### Added
 - Status-bar menu item *Set as Default Web Browser* — calls `NSWorkspace.setDefaultApplication` for `http`/`https`. macOS shows its own confirmation dialog. Relabels to *Triage is the Default Web Browser* (greyed) once the role is held, refreshed on every menu open so System Settings changes show up without restart.
 - Status-bar menu item *Launch at Login* — toggles `SMAppService.mainApp` registration. `.requiresApproval` and `.notFound` (app outside `/Applications`) surface an alert with a deep-link button into the relevant System Settings pane.
 
 ### Changed
 - README install instructions point at the new menu items instead of *System Settings → Desktop & Dock*; the troubleshooting section now suggests checking the menu before reaching for `plutil`.
+
+### Fixed
+- Release workflow now runs on `macos-26`, which ships the Swift 6.2 toolchain `Package.swift` requires. The `v0.1.0` tag-push failed silently against `macos-14`'s Swift 5.10, leaving the release without any uploaded artifacts and the Homebrew cask URL 404ing.
 
 ## [0.1.0] — Initial public beta
 
@@ -40,5 +45,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `open <url>` from Terminal — the AE sender PID is `/usr/bin/open`, which exits before we can resolve it. Such URLs route to the fallback browser.
 - No auto-update mechanism (Sparkle deferred until notarization is in place).
 
-[Unreleased]: https://github.com/jmanuelrosa/triage/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/jmanuelrosa/triage/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/jmanuelrosa/triage/releases/tag/v0.1.1
 [0.1.0]: https://github.com/jmanuelrosa/triage/releases/tag/v0.1.0
