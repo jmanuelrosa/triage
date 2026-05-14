@@ -20,7 +20,11 @@ concurrency:
 
 jobs:
   build:
-    runs-on: macos-14
+    # macos-14 ships Xcode 15 / Swift 5.10, but Package.swift declares
+    # `swift-tools-version:6.2`. macos-26 (matching ci.yml) ships an Xcode
+    # whose toolchain understands 6.2, so SwiftPM no longer refuses the
+    # manifest at build start.
+    runs-on: macos-26
     steps:
       - uses: actions/checkout@v6
 
