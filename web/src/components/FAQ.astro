@@ -1,5 +1,12 @@
 ---
 import { faqEntries } from "../data/faq.ts";
+
+const slugify = (text: string) =>
+  text
+    .toLowerCase()
+    .replace(/[^\p{Letter}\p{Number}]+/gu, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 60);
 ---
 
 <section id="faq" class="relative border-t border-[color:var(--color-line)]">
@@ -18,7 +25,7 @@ import { faqEntries } from "../data/faq.ts";
     <ul class="mt-12 divide-y divide-[color:var(--color-line)] overflow-hidden rounded-xl border border-[color:var(--color-line)] bg-[color:var(--color-bg-soft)]">
       {faqEntries.map((entry, i) => (
         <li>
-          <details class="group" open={i === 0}>
+          <details class="group faq-item" data-question={slugify(entry.question)} open={i === 0}>
             <summary
               class="flex cursor-pointer list-none items-center justify-between gap-6 px-6 py-5 text-left text-base font-medium text-[color:var(--color-fg)] transition hover:bg-[color:var(--color-bg)]"
             >
@@ -76,3 +83,12 @@ import { faqEntries } from "../data/faq.ts";
     display: none;
   }
 </style>
+
+<script>
+  for (const details of document.querySelectorAll<HTMLDetailsElement>(".faq-item")) {
+    details.addEventListener("toggle", () => {
+      if (!details.open) return;
+      window.umami?.track("faq-open", { question: details.dataset.question ?? "unknown" });
+    });
+  }
+</script>

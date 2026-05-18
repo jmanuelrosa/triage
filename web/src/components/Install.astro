@@ -2,6 +2,7 @@
 const commands = [
   {
     title: "Homebrew",
+    method: "homebrew",
     badge: "Recommended",
     body: "Cask install. Auto-updates with brew upgrade --cask triage. Strips the Gatekeeper quarantine for you.",
     cmd: "brew install --cask jmanuelrosa/tap/triage",
@@ -9,6 +10,7 @@ const commands = [
   },
   {
     title: "Install script",
+    method: "script",
     body: "Curl it, inspect it, run it. Downloads the latest release, copies Triage.app to /Applications, registers it with LaunchServices.",
     cmd: "curl -fsSL https://raw.githubusercontent.com/jmanuelrosa/triage/main/Scripts/install.sh | bash",
     highlight: false,
@@ -59,6 +61,7 @@ const buildFromSourceUrl = `${repoUrl}#option-4-build-from-source`;
               type="button"
               class="copy-btn shrink-0 rounded-md border border-[color:var(--color-line)] bg-[color:var(--color-bg-soft)] p-1.5 text-[color:var(--color-fg-mute)] transition hover:border-[color:var(--color-fg-mute)] hover:text-[color:var(--color-fg)]"
               data-copy={c.cmd}
+              data-method={c.method}
               aria-label={`Copy ${c.title} command`}
             >
               <svg viewBox="0 0 16 16" class="copy-icon h-3.5 w-3.5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -79,6 +82,7 @@ const buildFromSourceUrl = `${repoUrl}#option-4-build-from-source`;
         Also available:
         <a
           href={releasesUrl}
+          data-umami-event="install-dmg"
           class="underline decoration-[color:var(--color-line)] underline-offset-4 transition hover:text-[color:var(--color-fg)] hover:decoration-[color:var(--color-fg-mute)]"
         >
           DMG download
@@ -86,6 +90,7 @@ const buildFromSourceUrl = `${repoUrl}#option-4-build-from-source`;
         <span class="text-[color:var(--color-fg-mute)]">·</span>
         <a
           href={buildFromSourceUrl}
+          data-umami-event="install-from-source"
           class="underline decoration-[color:var(--color-line)] underline-offset-4 transition hover:text-[color:var(--color-fg)] hover:decoration-[color:var(--color-fg-mute)]"
         >
           build from source
@@ -107,6 +112,7 @@ const buildFromSourceUrl = `${repoUrl}#option-4-build-from-source`;
       } catch {
         return;
       }
+      window.umami?.track("install-copy", { method: btn.dataset.method ?? "unknown" });
       const copy = btn.querySelector<SVGElement>(".copy-icon");
       const check = btn.querySelector<SVGElement>(".check-icon");
       if (!copy || !check) return;

@@ -111,6 +111,8 @@ const toneClass = (tone?: Cell["tone"]) => {
                     href={row.href}
                     target="_blank"
                     rel="noreferrer"
+                    data-umami-event="compare-link"
+                    data-umami-event-tool={row.name.toLowerCase()}
                     class="text-[color:var(--color-fg-soft)] underline decoration-[color:var(--color-line)] underline-offset-4 transition hover:text-[color:var(--color-fg)] hover:decoration-[color:var(--color-fg-mute)]"
                   >
                     {row.name}
