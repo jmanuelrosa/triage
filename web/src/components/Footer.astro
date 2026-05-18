@@ -31,11 +31,11 @@ const buildDate = typeof __BUILD_DATE__ === "string" ? __BUILD_DATE__ : new Date
       </div>
 
       <nav class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
-        <a rel="noopener" href={repoUrl} class="text-[color:var(--color-fg-soft)] transition hover:text-[color:var(--color-fg)]">GitHub</a>
-        <a rel="noopener" href={`${repoUrl}/blob/main/README.md`} class="text-[color:var(--color-fg-soft)] transition hover:text-[color:var(--color-fg)]">README</a>
-        <a rel="noopener" href={`${repoUrl}/blob/main/config.example.yaml`} class="text-[color:var(--color-fg-soft)] transition hover:text-[color:var(--color-fg)]">Example config</a>
-        <a rel="noopener" href={`${repoUrl}/issues`} class="text-[color:var(--color-fg-soft)] transition hover:text-[color:var(--color-fg)]">Issues</a>
-        <a rel="noopener" href={`${repoUrl}/blob/main/LICENSE`} class="text-[color:var(--color-fg-soft)] transition hover:text-[color:var(--color-fg)]">MIT</a>
+        <a rel="noopener" href={repoUrl} data-umami-event="footer-link" data-umami-event-target="github" class="text-[color:var(--color-fg-soft)] transition hover:text-[color:var(--color-fg)]">GitHub</a>
+        <a rel="noopener" href={`${repoUrl}/blob/main/README.md`} data-umami-event="footer-link" data-umami-event-target="readme" class="text-[color:var(--color-fg-soft)] transition hover:text-[color:var(--color-fg)]">README</a>
+        <a rel="noopener" href={`${repoUrl}/blob/main/config.example.yaml`} data-umami-event="footer-link" data-umami-event-target="example-config" class="text-[color:var(--color-fg-soft)] transition hover:text-[color:var(--color-fg)]">Example config</a>
+        <a rel="noopener" href={`${repoUrl}/issues`} data-umami-event="footer-link" data-umami-event-target="issues" class="text-[color:var(--color-fg-soft)] transition hover:text-[color:var(--color-fg)]">Issues</a>
+        <a rel="noopener" href={`${repoUrl}/blob/main/LICENSE`} data-umami-event="footer-link" data-umami-event-target="mit" class="text-[color:var(--color-fg-soft)] transition hover:text-[color:var(--color-fg)]">MIT</a>
       </nav>
     </div>
 
