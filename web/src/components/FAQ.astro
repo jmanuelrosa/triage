@@ -1,12 +1,7 @@
 ---
-import { faqEntries } from "../data/faq.ts";
+import { getCollection } from "astro:content";
 
-const slugify = (text: string) =>
-  text
-    .toLowerCase()
-    .replace(/[^\p{Letter}\p{Number}]+/gu, "-")
-    .replace(/^-+|-+$/g, "")
-    .slice(0, 60);
+const faqEntries = await getCollection("faq");
 ---
 
 <section id="faq" class="relative border-t border-[color:var(--color-line)]">
@@ -25,11 +20,11 @@ const slugify = (text: string) =>
     <ul class="mt-12 divide-y divide-[color:var(--color-line)] overflow-hidden rounded-xl border border-[color:var(--color-line)] bg-[color:var(--color-bg-soft)]">
       {faqEntries.map((entry, i) => (
         <li>
-          <details class="group faq-item" data-question={slugify(entry.question)} open={i === 0}>
+          <details class="group faq-item" data-question={entry.id} open={i === 0}>
             <summary
               class="flex cursor-pointer list-none items-center justify-between gap-6 px-6 py-5 text-left text-base font-medium text-[color:var(--color-fg)] transition hover:bg-[color:var(--color-bg)]"
             >
-              <span>{entry.question}</span>
+              <span>{entry.data.question}</span>
               <span
                 aria-hidden="true"
                 class="grid h-6 w-6 shrink-0 place-items-center rounded-full border border-[color:var(--color-line)] text-[color:var(--color-fg-mute)] transition group-open:rotate-45 group-open:text-[color:var(--color-fg)]"
@@ -41,7 +36,7 @@ const slugify = (text: string) =>
             </summary>
             <div
               class="prose-faq px-6 pb-6 text-sm leading-relaxed text-[color:var(--color-fg-soft)]"
-              set:html={entry.answerHtml}
+              set:html={entry.data.answerHtml}
             />
           </details>
         </li>
