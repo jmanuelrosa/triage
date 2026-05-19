@@ -52,3 +52,9 @@ code, pre {
 .hairline-b {
   border-bottom: 1px solid var(--color-line);
 }
+
+/* Shiki transformer target: rule-matcher keys in the YAML snippet. */
+.yaml-rule-key {
+  color: var(--color-accent) !important;
+  font-weight: 600;
+}

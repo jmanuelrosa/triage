@@ -1,5 +1,21 @@
 ---
 import { Code } from "astro:components";
+import type { ShikiTransformer } from "shiki";
+
+const RULE_KEYS = new Set(["host", "path", "source_app", "browser"]);
+
+const triageRuleKeysTransformer: ShikiTransformer = {
+  name: "triage-yaml-rule-keys",
+  span(node) {
+    const child = node.children?.[0];
+    if (!child || child.type !== "text") return;
+    // Shiki bakes indentation into text nodes for nested YAML keys
+    // (e.g. "    browser"). Trim before matching against the keyword set.
+    if (!RULE_KEYS.has(child.value.trim())) return;
+    const existing = typeof node.properties.class === "string" ? node.properties.class : "";
+    node.properties.class = `${existing} yaml-rule-key`.trim();
+  },
+};
 
 const yamlSnippet = `browsers:
   personal:
@@ -94,7 +110,12 @@ const steps = [
           <span class="w-12"></span>
         </div>
         <div class="yaml-code">
-          <Code code={yamlSnippet} lang="yaml" theme="github-dark-default" />
+          <Code
+            code={yamlSnippet}
+            lang="yaml"
+            theme="github-dark-default"
+            transformers={[triageRuleKeysTransformer]}
+          />
         </div>
       </div>
     </div>
