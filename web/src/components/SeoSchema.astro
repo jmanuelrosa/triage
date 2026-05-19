@@ -1,5 +1,7 @@
 ---
-import { faqEntries } from "../data/faq.ts";
+import { getCollection } from "astro:content";
+
+const faqEntries = await getCollection("faq");
 
 interface Props {
   canonical: string;
@@ -72,10 +74,10 @@ const faqPage = {
   "@type": "FAQPage",
   mainEntity: faqEntries.map((entry) => ({
     "@type": "Question",
-    name: entry.question,
+    name: entry.data.question,
     acceptedAnswer: {
       "@type": "Answer",
-      text: entry.answerHtml,
+      text: entry.data.answerHtml,
     },
   })),
 };
