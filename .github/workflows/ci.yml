@@ -110,3 +110,24 @@ jobs:
       - name: Build site
         working-directory: ./web
         run: bun run build
+
+  # Runs on every PR / push regardless of which paths changed — secrets can
+  # land in any file. `GITLEAKS_LICENSE` enables the Pro ruleset if set;
+  # without it, the action falls back to the OSS rules and still gates.
+  secret-scan:
+    name: Secret Detection (GitLeaks)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      checks: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Run GitLeaks secret scanner
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
