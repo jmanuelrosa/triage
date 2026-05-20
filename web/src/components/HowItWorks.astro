@@ -2,7 +2,7 @@
 import { Code } from "astro:components";
 import type { ShikiTransformer } from "shiki";
 
-const RULE_KEYS = new Set(["host", "path", "source_app", "browser"]);
+const RULE_KEYS = new Set(["host", "path", "source_app", "cwd", "browser"]);
 
 const triageRuleKeysTransformer: ShikiTransformer = {
   name: "triage-yaml-rule-keys",
@@ -41,6 +41,11 @@ rules:
   # goes to the work browser
   - source_app: Slack
     browser: work_general
+
+  # Terminal URLs opened from anywhere inside ~/work
+  # route to the dev Chrome profile
+  - cwd: "~/work/*"
+    browser: work_dev
 `;
 
 const steps = [
@@ -52,7 +57,7 @@ const steps = [
   {
     n: "02",
     title: "Triage matches a rule",
-    body: "The URL host, path, and originating app are evaluated top-down against your YAML. First match wins.",
+    body: "The URL host, path, originating app, and — for terminal-launched URLs — originating directory are evaluated top-down against your YAML. First match wins.",
   },
   {
     n: "03",
