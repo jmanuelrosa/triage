@@ -24,6 +24,13 @@ public extension Rule {
                 .map { $0.caseInsensitiveCompare(sourceApp) == .orderedSame } ?? false
             guard bundleHit || nameHit else { return false }
         }
+        if let cwd = cwd {
+            // Strict: a rule with `cwd:` only matches when the context carries
+            // a resolved cwd (i.e. the URL was terminal-launched and the
+            // resolver succeeded). Unknown cwd → no match → fall through.
+            guard let contextCwd = context.cwd else { return false }
+            guard Glob.matchPath(cwd, against: contextCwd) else { return false }
+        }
         return true
     }
 }

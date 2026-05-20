@@ -1,3 +1,4 @@
+import Foundation
 import Testing
 @testable import TriageCore
 
@@ -231,5 +232,138 @@ struct RuleMatcherTests {
             )
         )
         #expect(result == nil)
+    }
+
+    // MARK: - cwd matching
+
+    /// A rule with `cwd:` must not match when the context has no cwd —
+    /// strict failure, falls through to other rules.
+    @Test func cwd_nilContextCwd_failsRule() {
+        let rule = Rule(cwd: "/Users/foo/work/*", browser: "work")
+        let context = MatchContext(host: "example.com", path: "/", cwd: nil)
+        #expect(RuleMatcher.firstMatch(rules: [rule], for: context) == nil)
+    }
+
+    @Test func cwd_exactPathMatch() {
+        let rule = Rule(cwd: "/tmp", browser: "work")
+        let context = MatchContext(host: nil, path: "/", cwd: "/tmp")
+        #expect(RuleMatcher.firstMatch(rules: [rule], for: context) == rule)
+    }
+
+    @Test func cwd_globMatchesDescendant() {
+        let rule = Rule(cwd: "/tmp/*", browser: "work")
+        let context = MatchContext(host: nil, path: "/", cwd: "/tmp/some-project/src")
+        #expect(RuleMatcher.firstMatch(rules: [rule], for: context) == rule)
+    }
+
+    /// Mirrors the existing path-glob semantics: `~/work/*` requires SOMETHING
+    /// after `~/work/`, so the directory itself doesn't match. Write
+    /// `cwd: "~/work"` (or both rules) if you want either.
+    @Test func cwd_globDoesNotMatchExactDir() {
+        let rule = Rule(cwd: "/tmp/work/*", browser: "work")
+        let context = MatchContext(host: nil, path: "/", cwd: "/tmp/work")
+        #expect(RuleMatcher.firstMatch(rules: [rule], for: context) == nil)
+    }
+
+    @Test func cwd_caseInsensitive() {
+        let rule = Rule(cwd: "/tmp/Work/*", browser: "work")
+        let context = MatchContext(host: nil, path: "/", cwd: "/tmp/work/foo")
+        #expect(RuleMatcher.firstMatch(rules: [rule], for: context) == rule)
+    }
+
+    @Test func cwd_trailingSlashInPatternNormalized() {
+        let rule = Rule(cwd: "/tmp/", browser: "work")
+        let context = MatchContext(host: nil, path: "/", cwd: "/tmp")
+        #expect(RuleMatcher.firstMatch(rules: [rule], for: context) == rule)
+    }
+
+    @Test func cwd_tildeExpansion() {
+        // ~/<dir> in the pattern expands to NSHomeDirectory()/<dir>. We pass
+        // the same dir already expanded as the context cwd.
+        let home = NSHomeDirectory()
+        let rule = Rule(cwd: "~/some-imaginary-dir-zzz/*", browser: "work")
+        let context = MatchContext(
+            host: nil, path: "/",
+            cwd: "\(home)/some-imaginary-dir-zzz/sub"
+        )
+        #expect(RuleMatcher.firstMatch(rules: [rule], for: context) == rule)
+    }
+
+    /// Real symlink on disk: rule references a path through a symlink, context
+    /// cwd is the resolved target. Both sides realpath'd → they match.
+    @Test func cwd_realpathResolvesSymlinkOnBothSides() throws {
+        let fm = FileManager.default
+        let tempBase = fm.temporaryDirectory
+            .appendingPathComponent("triage-cwd-test-\(UUID().uuidString)")
+        try fm.createDirectory(at: tempBase, withIntermediateDirectories: true)
+        defer { try? fm.removeItem(at: tempBase) }
+
+        let realDir = tempBase.appendingPathComponent("real-target")
+        let linkDir = tempBase.appendingPathComponent("link-name")
+        let workDir = realDir.appendingPathComponent("project")
+        try fm.createDirectory(at: workDir, withIntermediateDirectories: true)
+        try fm.createSymbolicLink(at: linkDir, withDestinationURL: realDir)
+
+        // Rule writes the path through the symlink ...
+        let rule = Rule(cwd: "\(linkDir.path)/*", browser: "work")
+        // ... context carries the already-resolved real path (what
+        // proc_pidinfo returns in production).
+        let context = MatchContext(host: nil, path: "/", cwd: workDir.path)
+        #expect(RuleMatcher.firstMatch(rules: [rule], for: context) == rule)
+    }
+
+    /// Broken / non-existent symlink: realpath fails, falls back to the
+    /// literal expanded path. A real cwd under the (resolved) target won't
+    /// match the literal pattern → no match (documented gotcha).
+    @Test func cwd_brokenPrefixFallsBackToLiteral() {
+        let rule = Rule(cwd: "/nonexistent-path-xyz/work/*", browser: "work")
+        let context = MatchContext(host: nil, path: "/", cwd: "/Users/foo/work/proj")
+        #expect(RuleMatcher.firstMatch(rules: [rule], for: context) == nil)
+    }
+
+    /// cwd matcher AND's with host: both must hit.
+    @Test func cwd_combinedWithHost_AND() {
+        let rule = Rule(host: "github.com", cwd: "/tmp/work/*", browser: "work")
+        let matchingContext = MatchContext(
+            host: "github.com", path: "/foo",
+            cwd: "/tmp/work/proj"
+        )
+        let wrongHost = MatchContext(
+            host: "gitlab.com", path: "/foo",
+            cwd: "/tmp/work/proj"
+        )
+        let wrongCwd = MatchContext(
+            host: "github.com", path: "/foo",
+            cwd: "/tmp/personal/proj"
+        )
+        #expect(RuleMatcher.firstMatch(rules: [rule], for: matchingContext) == rule)
+        #expect(RuleMatcher.firstMatch(rules: [rule], for: wrongHost) == nil)
+        #expect(RuleMatcher.firstMatch(rules: [rule], for: wrongCwd) == nil)
+    }
+
+    /// `cwd: "*"` matches any non-nil cwd — useful as a "any terminal URL"
+    /// catch-all that still doesn't match when resolution failed.
+    @Test func cwd_starMatchesAnyResolvedCwd() {
+        let rule = Rule(cwd: "*", browser: "work")
+        let resolved = MatchContext(host: nil, path: "/", cwd: "/tmp/foo")
+        let unresolved = MatchContext(host: nil, path: "/", cwd: nil)
+        #expect(RuleMatcher.firstMatch(rules: [rule], for: resolved) == rule)
+        #expect(RuleMatcher.firstMatch(rules: [rule], for: unresolved) == nil)
+    }
+
+    /// First-match-wins still holds when cwd is one of the matchers.
+    @Test func cwd_firstMatchWinsOrdering() {
+        let rules = [
+            Rule(cwd: "/tmp/work/*", browser: "work"),
+            Rule(cwd: "/tmp/*", browser: "personal"),
+        ]
+        let workContext = MatchContext(host: nil, path: "/", cwd: "/tmp/work/proj")
+        let personalContext = MatchContext(host: nil, path: "/", cwd: "/tmp/personal/proj")
+        #expect(
+            RuleMatcher.firstMatch(rules: rules, for: workContext)?.browser == "work"
+        )
+        #expect(
+            RuleMatcher.firstMatch(rules: rules, for: personalContext)?.browser == "personal"
+        )
     }
 }
