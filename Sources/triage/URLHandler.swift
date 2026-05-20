@@ -20,17 +20,20 @@ struct URLHandler {
     let stateURL: URL
     let chromeLocalStateURL: URL
     let ownBundleID: String
+    let cwdResolver: CwdResolving
 
     init(
         configURL: URL = Config.defaultURL,
         stateURL: URL = State.defaultURL,
         chromeLocalStateURL: URL = ChromeProfileResolver.defaultLocalStateURL,
-        ownBundleID: String = Bundle.main.bundleIdentifier ?? "com.jmrosamoncayo.triage"
+        ownBundleID: String = Bundle.main.bundleIdentifier ?? "com.jmrosamoncayo.triage",
+        cwdResolver: CwdResolving = SystemCwdResolver()
     ) {
         self.configURL = configURL
         self.stateURL = stateURL
         self.chromeLocalStateURL = chromeLocalStateURL
         self.ownBundleID = ownBundleID
+        self.cwdResolver = cwdResolver
     }
 
     func handle(url rawURL: String, senderPID: pid_t) {
@@ -39,10 +42,12 @@ struct URLHandler {
             : nil
         let sourceBundleID = sender?.bundleIdentifier
         let sourceAppName = sender?.localizedName
+        let resolvedCwd = cwdResolver.resolveCwd(senderPID: senderPID)
 
         log.info("""
         url=\(rawURL, privacy: .public)
           sender=\(sourceAppName ?? "?", privacy: .public) [\(sourceBundleID ?? "?", privacy: .public)] pid=\(senderPID, privacy: .public)
+          cwd=\(resolvedCwd ?? "?", privacy: .public)
         """)
 
         guard let parsed = URL(string: rawURL) else {
@@ -57,7 +62,8 @@ struct URLHandler {
             host: parsed.host,
             path: parsed.path.isEmpty ? "/" : parsed.path,
             sourceBundleID: sourceBundleID,
-            sourceAppName: sourceAppName
+            sourceAppName: sourceAppName,
+            cwd: resolvedCwd
         )
 
         var browser = resolveBrowser(config: config, context: context)
