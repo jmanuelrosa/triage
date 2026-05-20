@@ -48,8 +48,13 @@ public struct SystemCwdResolver: CwdResolving {
     // MARK: - Darwin syscall wrappers
 
     private static func executablePath(for pid: pid_t) -> String? {
-        var buffer = [CChar](repeating: 0, count: Int(PROC_PIDPATHINFO_MAXSIZE))
-        let bytes = proc_pidpath(pid, &buffer, UInt32(buffer.count))
+        // libproc.h defines PROC_PIDPATHINFO_MAXSIZE as (4 * MAXPATHLEN), but
+        // Swift's Darwin module on Xcode 26 doesn't expose it. MAXPATHLEN is
+        // available and the 4× multiplier mirrors the C constant for paranoid
+        // headroom against pathological paths.
+        let bufferSize = Int(MAXPATHLEN) * 4
+        var buffer = [CChar](repeating: 0, count: bufferSize)
+        let bytes = proc_pidpath(pid, &buffer, UInt32(bufferSize))
         guard bytes > 0 else { return nil }
         return String(cString: buffer)
     }
