@@ -40,6 +40,11 @@
     "answerHtml": "Yes. Each rule can include a <code>source_app</code> matcher, so you can send every link clicked from Slack to your work browser, every link clicked from WhatsApp to your personal browser, and so on — independent of the URL itself."
   },
   {
+    "id": "can-triage-route-urls-by-terminal-directory",
+    "question": "Can Triage route URLs by terminal directory?",
+    "answerHtml": "Yes. Rules can include a <code>cwd</code> matcher (a path glob like <code>~/work/*</code>) that fires for URLs opened from the terminal — <code>open</code>, <code>gh pr view -w</code>, anything that shells out through <code>/usr/bin/open</code>. Triage reads the originating process's current working directory at routing time, with symlinks resolved on both sides. A rule with <code>cwd</code> only matches terminal-launched URLs; clicks from other apps (Slack, Mail, …) fall through to your other rules."
+  },
+  {
     "id": "what-happens-to-a-link-that-doesn-t-match-any-rule",
     "question": "What happens to a link that doesn't match any rule?",
     "answerHtml": "Triage opens it in your previous default browser, which it captures automatically the first time you set Triage as the system default. You can change the fallback at any time from the menu-bar item, without editing the YAML."
