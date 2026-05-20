@@ -96,12 +96,12 @@ jobs:
 
       # Astro 6 requires Node 22+. The Ubuntu runner ships Node 20 by default,
       # and `astro check` / `astro build` execute under Node (not bun), even
-      # though bun is the package manager. Pin Node 22 explicitly so the
+      # though bun is the package manager. Pin Node explicitly so the
       # toolchain matches local dev.
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
+          node-version: '24.13'
 
       - name: Setup Bun
         uses: oven-sh/setup-bun@v2
