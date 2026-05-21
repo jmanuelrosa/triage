@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-05-21
+
+### Added
+- `cwd` rule matcher: route URLs by the current working directory of the terminal that opened them. Fires for anything that shells out through `/usr/bin/open` — `open`, `gh pr view -w`, `git web--browse`, npm scripts, your own aliases. Path globs accept `~/` and `*`; symlinks resolved on both sides. `cwd`-only rules ignore clicks from non-terminal apps (Slack, Mail, …), which fall through to your other rules.
+
 ## [0.1.1] — 2026-05-14
 
 ### Added
