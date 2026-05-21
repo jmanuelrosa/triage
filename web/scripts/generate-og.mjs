@@ -69,7 +69,9 @@ const yamlSnippet =
   - host: "*.example.com"
     browser: work_dev
   - source_app: Slack
-    browser: work_general`;
+    browser: work_general
+  - cwd: "~/work/*"
+    browser: work_dev`;
 
 function template() {
   return {

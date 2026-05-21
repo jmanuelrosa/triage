@@ -30,12 +30,6 @@ const features = [
     body: "URLs that match no rule open in your previous default browser, captured automatically. Configurable via the menu bar.",
     accent: "var(--color-accent-2)",
   },
-  {
-    title: "Terminal-aware",
-    body: "Route URLs opened from your shell by the directory you launched them from. ~/work goes one place, ~/personal goes another — write a cwd rule and forget it.",
-    accent: "var(--color-accent)",
-    badge: "NEW",
-  },
 ];
 ---
 
@@ -46,31 +40,21 @@ const features = [
         Built to disappear.
       </h2>
       <p class="mt-4 text-[color:var(--color-fg-soft)]">
-        Seven things Triage cares about, and nothing else.
+        Six things Triage cares about, and nothing else.
       </p>
     </div>
 
     <ul class="mt-12 grid grid-cols-1 gap-px overflow-hidden rounded-xl border border-[color:var(--color-line)] bg-[color:var(--color-line)] sm:grid-cols-2 lg:grid-cols-3">
       {features.map((f) => (
         <li class="bg-[color:var(--color-bg-soft)] p-6 transition hover:bg-[color:var(--color-bg)]">
-          <div class="mb-4 flex items-center gap-2">
-            <div
-              class="inline-flex h-7 w-7 items-center justify-center rounded-md border border-[color:var(--color-line)]"
-              style={`background: color-mix(in oklab, ${f.accent} 12%, transparent);`}
-            >
-              <span
-                class="inline-block h-1.5 w-1.5 rounded-full"
-                style={`background: ${f.accent};`}
-              ></span>
-            </div>
-            {f.badge && (
-              <span
-                class="inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-widest"
-                style={`color: ${f.accent}; border-color: color-mix(in oklab, ${f.accent} 40%, transparent); background: color-mix(in oklab, ${f.accent} 8%, transparent);`}
-              >
-                {f.badge}
-              </span>
-            )}
+          <div
+            class="mb-4 inline-flex h-7 w-7 items-center justify-center rounded-md border border-[color:var(--color-line)]"
+            style={`background: color-mix(in oklab, ${f.accent} 12%, transparent);`}
+          >
+            <span
+              class="inline-block h-1.5 w-1.5 rounded-full"
+              style={`background: ${f.accent};`}
+            ></span>
           </div>
           <h3 class="text-base font-medium text-[color:var(--color-fg)]">
             {f.title}
