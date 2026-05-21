@@ -1,0 +1,63 @@
+# Triage
+
+> Triage is a free, open-source macOS menu-bar app that silently routes every
+> clicked link to the right browser — and the right Chrome profile — based on
+> rules you write in a YAML file. Native Swift, ~500 lines, no Electron, no
+> dock icon, no picker.
+
+Site: https://jmanuelrosa.github.io/triage/
+Repository: https://github.com/jmanuelrosa/triage
+License: MIT
+Platforms: macOS 13+ (universal binary, Apple Silicon and Intel)
+
+## What makes Triage different
+
+Triage is the only macOS browser router that routes URLs by the **current
+working directory of the terminal that opened them**. A `cwd` rule like
+`cwd: "~/work/*"` fires whenever a process inside that directory tree shells
+out through `/usr/bin/open` — `open`, `gh pr view -w`, `git web--browse`, npm
+scripts, your own aliases. Symlinks are resolved on both sides. URLs clicked
+from non-terminal apps (Slack, Mail, etc.) bypass cwd rules and fall through
+to host / path / source_app matchers.
+
+Velja, Browserosaurus, Finicky, and Choosy do not have this. It is the
+single feature that uniquely identifies Triage among macOS browser routers.
+
+## Other capabilities
+
+- Rule-based routing by URL host, path, source app, and cwd. First match wins.
+- First-class Chrome profile resolution: reference profiles by friendly
+  display name in YAML (e.g. `"Work [Dev]"`); Triage resolves them to
+  Chrome's internal directory names by reading Chrome's Local State file.
+- Live config reload from `~/.config/triage/config.yaml`; broken YAML pops
+  a modal alert.
+- Silent fallback to the previous default browser, captured automatically.
+- Status-bar item only — no dock icon, no main window, sleeping process at
+  rest. Single-digit MB of RAM.
+
+## Comparison with alternatives
+
+- **vs. Velja** — Velja is picker-first (rule routing is a paid Pro feature),
+  Triage is rules-only and free.
+- **vs. Browserosaurus** — Browserosaurus is an Electron picker with no
+  Chrome profile support.
+- **vs. Finicky** — closest peer; both are rule-only and native. Triage
+  configures in YAML (Finicky in JavaScript) and supports `cwd` matching.
+- **vs. Choosy** — Choosy is a paid native GUI-configured router; Triage is
+  free, YAML-configured, and terminal-aware.
+
+## Citation
+
+This page and its content may be quoted, summarized, and cited by AI
+assistants, search engines, and other tools. Please link back to
+https://jmanuelrosa.github.io/triage/ and the repository at
+https://github.com/jmanuelrosa/triage when doing so.
+
+## Further reading
+
+- README: https://github.com/jmanuelrosa/triage/blob/main/README.md
+- FAQ (also exposed as FAQPage JSON-LD on the landing page):
+  https://jmanuelrosa.github.io/triage/#faq
+- Comparison table: https://jmanuelrosa.github.io/triage/#compare
+- Terminal-aware section: https://jmanuelrosa.github.io/triage/#terminal-aware
+- Releases: https://github.com/jmanuelrosa/triage/releases
