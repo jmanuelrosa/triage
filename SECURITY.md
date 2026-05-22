@@ -53,6 +53,16 @@ Reports about the following will be closed without action:
 - **Generic missing-hardening reports** (no PIE, no stack canaries, etc.) without a concrete exploit.
 - **Issues in third-party browsers Triage launches.** Report those upstream (Chrome, Helium, etc.).
 
+## Supply chain
+
+Triage has a small dependency surface (Yams for the app; Astro + Tailwind for the landing site), but supply-chain compromise is still the most likely route to a malicious release. The following run continuously against this repo:
+
+- **[Socket](https://socket.dev/)** — GitHub App that inspects every PR touching `web/package.json` / `bun.lock` and flags risky package behavior (install scripts, network access, obfuscated code, typosquats, sudden maintainer changes). Reports land as PR comments; high-risk findings block merge until reviewed.
+- **Dependabot security alerts** — enabled for Swift, npm, and GitHub Actions ecosystems (see `.github/dependabot.yml`). Version-bump PRs are intentionally disabled (`open-pull-requests-limit: 0`); only CVE-driven alerts surface, which we triage manually.
+- **GitLeaks** — runs on every push and PR in `.github/workflows/ci.yml`, regardless of which paths changed. Gates merges on any committed secret.
+
+If you spot a malicious dependency or a Socket/Dependabot alert that we appear to have missed, please report it via the private channel above rather than opening a public issue.
+
 ## Hardening checklist (for our reference)
 
 Items below are tracked but may not all ship in v1:
