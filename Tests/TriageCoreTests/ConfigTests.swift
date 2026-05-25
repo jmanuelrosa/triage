@@ -162,6 +162,77 @@ struct ConfigTests {
         }
     }
 
+    // MARK: - Loopback policy
+
+    /// Configs that pre-date `loopback_aliases` must still parse — the
+    /// missing key decodes as an empty array, not a throw.
+    @Test func parse_missingLoopbackAliases_defaultsToEmpty() throws {
+        let yaml = """
+        browsers:
+          helium:
+            bundle_id: net.imput.helium
+        rules: []
+        """
+        let config = try Config.parse(yaml: yaml)
+        #expect(config.loopbackAliases.isEmpty)
+    }
+
+    @Test func parse_loopbackAliases_present() throws {
+        let yaml = """
+        browsers:
+          helium:
+            bundle_id: net.imput.helium
+        rules: []
+        loopback_aliases:
+          - my-test-app
+          - addingwell-dev
+        """
+        let config = try Config.parse(yaml: yaml)
+        #expect(config.loopbackAliases == ["my-test-app", "addingwell-dev"])
+    }
+
+    @Test func isLoopbackHost_builtinExactMatches() {
+        let config = Config()
+        #expect(config.isLoopbackHost("localhost"))
+        #expect(config.isLoopbackHost("127.0.0.1"))
+        #expect(config.isLoopbackHost("::1"))
+        // Case-insensitive.
+        #expect(config.isLoopbackHost("LOCALHOST"))
+    }
+
+    @Test func isLoopbackHost_builtinSuffixes() {
+        let config = Config()
+        // mDNS / Bonjour.
+        #expect(config.isLoopbackHost("app.local"))
+        #expect(config.isLoopbackHost("api.dev.local"))
+        // RFC 6761 reserved.
+        #expect(config.isLoopbackHost("foo.localhost"))
+        // Laravel Valet / Herd convention.
+        #expect(config.isLoopbackHost("my-app.test"))
+        // Suffix is anchored — a substring isn't enough.
+        #expect(!config.isLoopbackHost("mylocalhost.com"))
+        #expect(!config.isLoopbackHost("test.com"))
+    }
+
+    @Test func isLoopbackHost_userAliases() {
+        let config = Config(loopbackAliases: ["my-test-app", "internal-dev.acme.io"])
+        #expect(config.isLoopbackHost("my-test-app"))
+        #expect(config.isLoopbackHost("internal-dev.acme.io"))
+        // Case-insensitive alias matching.
+        #expect(config.isLoopbackHost("MY-TEST-APP"))
+        // Aliases require an exact match, not a suffix.
+        #expect(!config.isLoopbackHost("foo.my-test-app"))
+        // Unrelated hosts stay non-loopback.
+        #expect(!config.isLoopbackHost("github.com"))
+    }
+
+    @Test func isLoopbackHost_unrelatedHosts() {
+        let config = Config(loopbackAliases: ["my-test-app"])
+        #expect(!config.isLoopbackHost("github.com"))
+        #expect(!config.isLoopbackHost("example.com"))
+        #expect(!config.isLoopbackHost("192.168.1.50"))  // LAN, not loopback
+    }
+
     // MARK: - Realistic full example from the plan
 
     @Test func parse_planExampleYAML() throws {

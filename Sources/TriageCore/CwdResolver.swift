@@ -3,32 +3,41 @@ import Foundation
 import Darwin
 #endif
 
-/// Resolves the current working directory of the process that invoked `open`
-/// for a URL. Only meaningful when the AE sender resolves to `/usr/bin/open`;
-/// every other case returns `nil` (and rules with `cwd:` will not match).
+/// Resolves the current working directory associated with a URL-open request,
+/// via one of two signals:
 ///
-/// Returning `nil` is the safe default for every failure: race lost
-/// (`/usr/bin/open` already exited), parent process unreachable, sandbox
-/// restriction, anything else. The contract is "best-effort, strict-fail."
+/// 1. The Apple Event sender PID. Works when the AE sender resolves to
+///    `/usr/bin/open` and `open`'s parent is still alive (terminal / SDK
+///    invocation that doesn't detach `open`).
+/// 2. The PID listening on the URL's TCP port. Works for loopback URLs from
+///    dev servers (Vite/Next/CRA via the `open` npm package), where `open`
+///    is detached + unref'd and exits before the AE arrives — the sender PID
+///    is dead, but the dev-server listener is alive for the whole session.
+///
+/// Both methods return `nil` on any failure. The matcher treats `nil` as
+/// "no cwd rule can match" and falls through. The contract is "best-effort,
+/// strict-fail."
 public protocol CwdResolving {
     /// Resolved cwd as an absolute path, or `nil` if the URL was not
     /// terminal-launched or the cwd could not be read.
     func resolveCwd(senderPID: pid_t) -> String?
+
+    /// Resolved cwd by inspecting the process listening on `port`, or `nil`
+    /// if no listener was found, the listener is on the Docker denylist, or
+    /// its cwd could not be read. Intended as the second-chance lookup for
+    /// loopback URLs when sender-PID resolution fails.
+    func resolveCwd(listeningOnPort port: UInt16) -> String?
 }
 
-/// Production implementation: walks one level up the process tree from the
-/// `/usr/bin/open` invocation and reads the parent's cwd via `proc_pidinfo`.
-///
-/// Pipeline:
-/// 1. `proc_pidpath(senderPID)` — confirm the sender is `/usr/bin/open`.
-///    Any other executable path → not terminal-launched → `nil`.
-/// 2. `sysctl(KERN_PROC_PID, senderPID)` → `kp_eproc.e_ppid` — the PID of
-///    whoever ran `open`. Single-level walk, no shell-finding heuristic.
-/// 3. `proc_pidinfo(parentPID, PROC_PIDVNODEPATHINFO)` — the parent's cwd.
-///
-/// Step 1 doubles as the gate: if `/usr/bin/open` has already exited by the
-/// time we look it up (race lost), `proc_pidpath` fails and we return `nil`,
-/// which the matcher treats as "no cwd-rule can match" — falls through.
+public extension CwdResolving {
+    /// Default no-op: conformers that only implement the sender-PID path get
+    /// the port path for free as "always nil," so URLHandler can call both
+    /// uniformly. `SystemCwdResolver` overrides this with a real lookup.
+    func resolveCwd(listeningOnPort port: UInt16) -> String? { nil }
+}
+
+/// Production implementation backed by `libproc` and `sysctl`. See the
+/// individual method docs for the per-signal pipeline.
 public struct SystemCwdResolver: CwdResolving {
     public init() {}
 
@@ -37,12 +46,39 @@ public struct SystemCwdResolver: CwdResolving {
     /// SDK `webbrowser` helpers, …) through this binary.
     private static let openBinaryPath = "/usr/bin/open"
 
+    /// Pipeline:
+    /// 1. `proc_pidpath(senderPID)` — confirm the sender is `/usr/bin/open`.
+    ///    Any other executable path → not terminal-launched → `nil`. This
+    ///    also doubles as a liveness check: if `open` has already exited
+    ///    (race lost) `proc_pidpath` returns 0 → `nil`.
+    /// 2. `sysctl(KERN_PROC_PID, senderPID)` → `kp_eproc.e_ppid` — the PID of
+    ///    whoever ran `open`. Single-level walk, no shell-finding heuristic.
+    /// 3. `proc_pidinfo(parentPID, PROC_PIDVNODEPATHINFO)` — the parent's cwd.
     public func resolveCwd(senderPID: pid_t) -> String? {
         guard senderPID > 0 else { return nil }
         guard let senderPath = Self.executablePath(for: senderPID) else { return nil }
         guard senderPath == Self.openBinaryPath else { return nil }
         guard let parentPID = Self.parentPID(of: senderPID), parentPID > 0 else { return nil }
         return Self.workingDirectory(of: parentPID)
+    }
+
+    /// Pipeline:
+    /// 1. Walk every running PID's open FDs (`proc_listallpids` →
+    ///    `proc_pidinfo(PROC_PIDLISTFDS)`); find one with a TCP socket in
+    ///    `LISTEN` state whose local port equals `port`.
+    /// 2. Read that PID's executable path; reject it if it looks like Docker
+    ///    (the listener is the daemon, not the project — its cwd is useless).
+    /// 3. Read its cwd via `proc_pidinfo(PROC_PIDVNODEPATHINFO)` — same helper
+    ///    as the sender-PID path.
+    ///
+    /// Any step failing returns `nil` (strict-fail, same as the sender path).
+    public func resolveCwd(listeningOnPort port: UInt16) -> String? {
+        guard port > 0 else { return nil }
+        guard let pid = Self.pidListeningOnTCPPort(port) else { return nil }
+        if let exe = Self.executablePath(for: pid), Self.isDockerExecutable(exe) {
+            return nil
+        }
+        return Self.workingDirectory(of: pid)
     }
 
     // MARK: - Darwin syscall wrappers
@@ -90,5 +126,89 @@ public struct SystemCwdResolver: CwdResolving {
             }
         }
         return cwd.isEmpty ? nil : cwd
+    }
+
+    // MARK: - Port-listener walk
+
+    /// Two-pass `proc_listallpids` (size, then populate). The extra slack
+    /// guards against PIDs spawning between the two calls.
+    private static func pidListeningOnTCPPort(_ targetPort: UInt16) -> pid_t? {
+        let probeSize = proc_listallpids(nil, 0)
+        guard probeSize > 0 else { return nil }
+        let probeCount = Int(probeSize) / MemoryLayout<pid_t>.stride
+        var pids = [pid_t](repeating: 0, count: probeCount + 32)
+        let bufferBytes = Int32(pids.count * MemoryLayout<pid_t>.stride)
+        let writtenBytes = proc_listallpids(&pids, bufferBytes)
+        guard writtenBytes > 0 else { return nil }
+        let writtenCount = Int(writtenBytes) / MemoryLayout<pid_t>.stride
+
+        for index in 0..<writtenCount where pids[index] > 0 {
+            if processIsListeningOnTCPPort(pid: pids[index], port: targetPort) {
+                return pids[index]
+            }
+        }
+        return nil
+    }
+
+    /// Enumerates the PID's FDs and looks for a TCP socket in LISTEN whose
+    /// local port matches. Skips silently on any per-PID failure (perm,
+    /// dead, etc.) — those are not our process to inspect.
+    private static func processIsListeningOnTCPPort(pid: pid_t, port: UInt16) -> Bool {
+        let probeSize = proc_pidinfo(pid, PROC_PIDLISTFDS, 0, nil, 0)
+        guard probeSize > 0 else { return false }
+        let fdCount = Int(probeSize) / MemoryLayout<proc_fdinfo>.stride
+        var fds = [proc_fdinfo](repeating: proc_fdinfo(), count: fdCount)
+        let writtenBytes = proc_pidinfo(pid, PROC_PIDLISTFDS, 0, &fds, probeSize)
+        guard writtenBytes > 0 else { return false }
+        let writtenCount = Int(writtenBytes) / MemoryLayout<proc_fdinfo>.stride
+
+        for index in 0..<writtenCount {
+            let fd = fds[index]
+            // `proc_fdtype` is `uint32_t`; macro is bridged as Int — go via Int
+            // to dodge differing import widths across SDK versions.
+            guard Int(fd.proc_fdtype) == Int(PROX_FDTYPE_SOCKET) else { continue }
+            if socketFDIsListeningOnTCPPort(pid: pid, fd: fd.proc_fd, port: port) {
+                return true
+            }
+        }
+        return false
+    }
+
+    private static func socketFDIsListeningOnTCPPort(pid: pid_t, fd: Int32, port: UInt16) -> Bool {
+        var info = socket_fdinfo()
+        let infoSize = Int32(MemoryLayout<socket_fdinfo>.size)
+        let result = proc_pidfdinfo(pid, fd, PROC_PIDFDSOCKETINFO, &info, infoSize)
+        guard result == infoSize else { return false }
+        // `soi_kind` and `tcpsi_state` are C `int`; constants are bridged as
+        // Int (enum cases) or Int32 (macros) depending on SDK — coerce both
+        // sides to Int to compare safely.
+        guard Int(info.psi.soi_kind) == Int(SOCKINFO_TCP) else { return false }
+
+        let tcp = info.psi.soi_proto.pri_tcp
+        guard Int(tcp.tcpsi_state) == Int(TSI_S_LISTEN) else { return false }
+
+        // `insi_lport` is a C `int` holding the port in network byte order in
+        // its low 16 bits. Truncate, then swap.
+        let netPort = UInt16(truncatingIfNeeded: tcp.tcpsi_ini.insi_lport)
+        let hostPort = UInt16(bigEndian: netPort)
+        return hostPort == port
+    }
+
+    // MARK: - Docker denylist
+
+    /// Docker publishes container ports by having `com.docker.backend`
+    /// (or `vpnkit`) listen on the host port and proxy. Its cwd is `/` or
+    /// Docker's working dir — meaningless for routing the project. Treat
+    /// any listener whose executable path matches these prefixes as if no
+    /// listener was found.
+    private static let dockerExecutablePrefixes: [String] = [
+        "/Applications/Docker.app/",
+        "/usr/local/bin/docker",
+        "/opt/homebrew/bin/docker",
+        "/Library/Application Support/com.docker.",
+    ]
+
+    private static func isDockerExecutable(_ path: String) -> Bool {
+        dockerExecutablePrefixes.contains { path.hasPrefix($0) }
     }
 }

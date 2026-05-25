@@ -42,13 +42,6 @@ struct URLHandler {
             : nil
         let sourceBundleID = sender?.bundleIdentifier
         let sourceAppName = sender?.localizedName
-        let resolvedCwd = cwdResolver.resolveCwd(senderPID: senderPID)
-
-        log.info("""
-        url=\(rawURL, privacy: .public)
-          sender=\(sourceAppName ?? "?", privacy: .public) [\(sourceBundleID ?? "?", privacy: .public)] pid=\(senderPID, privacy: .public)
-          cwd=\(resolvedCwd ?? "?", privacy: .public)
-        """)
 
         guard let parsed = URL(string: rawURL) else {
             log.error("could not parse url: \(rawURL, privacy: .public)")
@@ -56,6 +49,16 @@ struct URLHandler {
         }
 
         let config = loadConfigOrEmpty()
+        let (resolvedCwd, cwdSource) = resolveCwd(
+            parsedURL: parsed, senderPID: senderPID, config: config
+        )
+
+        log.info("""
+        url=\(rawURL, privacy: .public)
+          sender=\(sourceAppName ?? "?", privacy: .public) [\(sourceBundleID ?? "?", privacy: .public)] pid=\(senderPID, privacy: .public)
+          cwd=\(resolvedCwd ?? "?", privacy: .public) cwd-source=\(cwdSource, privacy: .public)
+        """)
+
         let chromeResolver = loadChromeResolverOrEmpty()
 
         let context = MatchContext(
@@ -81,6 +84,32 @@ struct URLHandler {
     }
 
     // MARK: - Helpers
+
+    /// Two-step cwd resolution: try the AE sender PID first (works for
+    /// terminal-launched URLs); if that fails and the URL host is recognised
+    /// as loopback (built-in localhost/127.0.0.1/::1, conventional `.local`/
+    /// `.localhost`/`.test` TLDs, or a user-defined `loopback_aliases` entry)
+    /// with an explicit port, try the process listening on that port (works
+    /// for dev-server auto-opens, where `/usr/bin/open` exits before the AE
+    /// arrives). Returns the resolved cwd and a tag for logging.
+    private func resolveCwd(
+        parsedURL: URL,
+        senderPID: pid_t,
+        config: Config
+    ) -> (String?, String) {
+        if let cwd = cwdResolver.resolveCwd(senderPID: senderPID) {
+            return (cwd, "sender")
+        }
+        guard let host = parsedURL.host,
+              config.isLoopbackHost(host),
+              let port = parsedURL.port,
+              port > 0, port <= 65535
+        else { return (nil, "none") }
+        if let cwd = cwdResolver.resolveCwd(listeningOnPort: UInt16(port)) {
+            return (cwd, "port")
+        }
+        return (nil, "none")
+    }
 
     private func loadConfigOrEmpty() -> Config {
         do {
