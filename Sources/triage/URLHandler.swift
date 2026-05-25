@@ -16,11 +16,6 @@ struct URLHandler {
     /// Last-resort fallback when fallback-browser.json is missing / unreadable.
     static let ultimateFallbackBundleID = "com.apple.Safari"
 
-    /// Hosts we treat as "this machine" for the port-listener cwd fallback.
-    /// Anything outside this set never triggers a port lookup — there's no
-    /// meaningful "remote host on port X = local process Y" mapping.
-    private static let loopbackHosts: Set<String> = ["localhost", "127.0.0.1", "::1"]
-
     let configURL: URL
     let stateURL: URL
     let chromeLocalStateURL: URL
@@ -53,7 +48,10 @@ struct URLHandler {
             return
         }
 
-        let (resolvedCwd, cwdSource) = resolveCwd(parsedURL: parsed, senderPID: senderPID)
+        let config = loadConfigOrEmpty()
+        let (resolvedCwd, cwdSource) = resolveCwd(
+            parsedURL: parsed, senderPID: senderPID, config: config
+        )
 
         log.info("""
         url=\(rawURL, privacy: .public)
@@ -61,7 +59,6 @@ struct URLHandler {
           cwd=\(resolvedCwd ?? "?", privacy: .public) cwd-source=\(cwdSource, privacy: .public)
         """)
 
-        let config = loadConfigOrEmpty()
         let chromeResolver = loadChromeResolverOrEmpty()
 
         let context = MatchContext(
@@ -89,16 +86,22 @@ struct URLHandler {
     // MARK: - Helpers
 
     /// Two-step cwd resolution: try the AE sender PID first (works for
-    /// terminal-launched URLs); if that fails and the URL is loopback with
-    /// an explicit port, try the process listening on that port (works for
-    /// dev-server auto-opens, where `/usr/bin/open` exits before the AE
+    /// terminal-launched URLs); if that fails and the URL host is recognised
+    /// as loopback (built-in localhost/127.0.0.1/::1, conventional `.local`/
+    /// `.localhost`/`.test` TLDs, or a user-defined `loopback_aliases` entry)
+    /// with an explicit port, try the process listening on that port (works
+    /// for dev-server auto-opens, where `/usr/bin/open` exits before the AE
     /// arrives). Returns the resolved cwd and a tag for logging.
-    private func resolveCwd(parsedURL: URL, senderPID: pid_t) -> (String?, String) {
+    private func resolveCwd(
+        parsedURL: URL,
+        senderPID: pid_t,
+        config: Config
+    ) -> (String?, String) {
         if let cwd = cwdResolver.resolveCwd(senderPID: senderPID) {
             return (cwd, "sender")
         }
-        guard let host = parsedURL.host?.lowercased(),
-              Self.loopbackHosts.contains(host),
+        guard let host = parsedURL.host,
+              config.isLoopbackHost(host),
               let port = parsedURL.port,
               port > 0, port <= 65535
         else { return (nil, "none") }

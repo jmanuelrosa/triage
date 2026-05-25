@@ -15,9 +15,21 @@
 #     invocations) and, for loopback URLs, from the process listening on the
 #     URL's TCP port — so dev-server auto-opens like `http://localhost:3000/`
 #     route correctly. Loopback URLs need an explicit port for the port-based
-#     resolution to work.
+#     resolution to work. Built-in loopback hosts: `localhost`, `127.0.0.1`,
+#     `::1`, plus anything ending in `.local`, `.localhost`, or `.test`. For
+#     bare hostnames you've put in /etc/hosts (e.g. `my-test-app`), add them
+#     to `loopback_aliases` below.
 # No `default_browser` field — the silent fallback is whatever the system default
 # browser was at Triage's first launch (captured to ~/.config/triage/fallback-browser.json).
+
+# Optional. Hostnames you want treated as loopback for cwd-port resolution,
+# in addition to the built-in matches. Useful for /etc/hosts aliases and
+# company-internal dev hostnames that don't end in .local/.localhost/.test.
+# Comparison is case-insensitive and matches the full host (not a suffix).
+#
+# loopback_aliases:
+#   - my-test-app
+#   - acme-dev
 
 browsers:
   helium:

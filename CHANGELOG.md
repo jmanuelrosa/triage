@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `loopback_aliases` config field: list of hostnames to treat as loopback for the cwd-port resolver, in addition to the built-in matches. Use this for `/etc/hosts` entries and bare company-internal dev names like `my-test-app`. The cwd-port lookup also now recognises the conventional dev TLDs `.local` (mDNS / Bonjour), `.localhost` (RFC 6761), and `.test` (Laravel Valet / Herd / RFC 6761) — so `http://app.test:3000/` and similar route by cwd without any extra config.
+
 ### Fixed
 - `cwd` rules now fire for loopback URLs auto-opened by dev servers (Vite, Next, CRA, …). These tools shell out to `/usr/bin/open` detached, so the sender process is dead by the time the Apple Event reaches Triage and the sender-PID resolver returns `nil`. For `http://localhost:<port>/` URLs, the resolver now falls back to inspecting the process listening on the URL's TCP port and reading its working directory — the dev-server listener is alive for the whole session, so the lookup is reliable. Docker-published ports are skipped (the daemon's cwd isn't the project's). URL-handler logs now include a `cwd-source=sender|port|none` tag for diagnostics.
 
