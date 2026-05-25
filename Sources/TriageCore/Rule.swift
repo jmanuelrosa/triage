@@ -35,10 +35,12 @@ public struct MatchContext: Equatable {
     public var path: String
     public var sourceBundleID: String?
     public var sourceAppName: String?
-    /// Resolved current working directory of the process that invoked the URL,
-    /// when known. Only populated for terminal-launched URLs (sender resolves
-    /// to `/usr/bin/open`); `nil` otherwise. Rules with `cwd:` only match when
-    /// this is set, by design — see RuleMatcher.
+    /// Resolved current working directory associated with the URL, from one
+    /// of two signals: the AE sender's parent process (terminal-launched via
+    /// `/usr/bin/open`), or — for loopback URLs — the process listening on
+    /// the URL's TCP port (dev-server auto-open path). `nil` when neither
+    /// signal applies. Rules with `cwd:` only match when this is set, by
+    /// design — see RuleMatcher.
     public var cwd: String?
 
     public init(

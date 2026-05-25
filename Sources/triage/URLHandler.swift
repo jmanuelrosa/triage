@@ -16,6 +16,11 @@ struct URLHandler {
     /// Last-resort fallback when fallback-browser.json is missing / unreadable.
     static let ultimateFallbackBundleID = "com.apple.Safari"
 
+    /// Hosts we treat as "this machine" for the port-listener cwd fallback.
+    /// Anything outside this set never triggers a port lookup — there's no
+    /// meaningful "remote host on port X = local process Y" mapping.
+    private static let loopbackHosts: Set<String> = ["localhost", "127.0.0.1", "::1"]
+
     let configURL: URL
     let stateURL: URL
     let chromeLocalStateURL: URL
@@ -42,18 +47,19 @@ struct URLHandler {
             : nil
         let sourceBundleID = sender?.bundleIdentifier
         let sourceAppName = sender?.localizedName
-        let resolvedCwd = cwdResolver.resolveCwd(senderPID: senderPID)
-
-        log.info("""
-        url=\(rawURL, privacy: .public)
-          sender=\(sourceAppName ?? "?", privacy: .public) [\(sourceBundleID ?? "?", privacy: .public)] pid=\(senderPID, privacy: .public)
-          cwd=\(resolvedCwd ?? "?", privacy: .public)
-        """)
 
         guard let parsed = URL(string: rawURL) else {
             log.error("could not parse url: \(rawURL, privacy: .public)")
             return
         }
+
+        let (resolvedCwd, cwdSource) = resolveCwd(parsedURL: parsed, senderPID: senderPID)
+
+        log.info("""
+        url=\(rawURL, privacy: .public)
+          sender=\(sourceAppName ?? "?", privacy: .public) [\(sourceBundleID ?? "?", privacy: .public)] pid=\(senderPID, privacy: .public)
+          cwd=\(resolvedCwd ?? "?", privacy: .public) cwd-source=\(cwdSource, privacy: .public)
+        """)
 
         let config = loadConfigOrEmpty()
         let chromeResolver = loadChromeResolverOrEmpty()
@@ -81,6 +87,26 @@ struct URLHandler {
     }
 
     // MARK: - Helpers
+
+    /// Two-step cwd resolution: try the AE sender PID first (works for
+    /// terminal-launched URLs); if that fails and the URL is loopback with
+    /// an explicit port, try the process listening on that port (works for
+    /// dev-server auto-opens, where `/usr/bin/open` exits before the AE
+    /// arrives). Returns the resolved cwd and a tag for logging.
+    private func resolveCwd(parsedURL: URL, senderPID: pid_t) -> (String?, String) {
+        if let cwd = cwdResolver.resolveCwd(senderPID: senderPID) {
+            return (cwd, "sender")
+        }
+        guard let host = parsedURL.host?.lowercased(),
+              Self.loopbackHosts.contains(host),
+              let port = parsedURL.port,
+              port > 0, port <= 65535
+        else { return (nil, "none") }
+        if let cwd = cwdResolver.resolveCwd(listeningOnPort: UInt16(port)) {
+            return (cwd, "port")
+        }
+        return (nil, "none")
+    }
 
     private func loadConfigOrEmpty() -> Config {
         do {

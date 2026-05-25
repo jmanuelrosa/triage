@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- `cwd` rules now fire for loopback URLs auto-opened by dev servers (Vite, Next, CRA, …). These tools shell out to `/usr/bin/open` detached, so the sender process is dead by the time the Apple Event reaches Triage and the sender-PID resolver returns `nil`. For `http://localhost:<port>/` URLs, the resolver now falls back to inspecting the process listening on the URL's TCP port and reading its working directory — the dev-server listener is alive for the whole session, so the lookup is reliable. Docker-published ports are skipped (the daemon's cwd isn't the project's). URL-handler logs now include a `cwd-source=sender|port|none` tag for diagnostics.
+
 ## [0.2.0] — 2026-05-21
 
 ### Added
