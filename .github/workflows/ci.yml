@@ -99,7 +99,7 @@ jobs:
       # though bun is the package manager. Pin Node explicitly so the
       # toolchain matches local dev.
       - name: Setup Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '24.13'
 
