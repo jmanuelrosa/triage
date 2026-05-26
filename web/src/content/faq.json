@@ -32,7 +32,7 @@
   {
     "id": "how-do-i-write-rules",
     "question": "How do I write rules?",
-    "answerHtml": "Rules live in <code>~/.config/triage/config.yaml</code> as a list of objects with optional <code>host</code>, <code>path</code>, and <code>source_app</code> matchers plus a target <code>browser</code>. Save the file and Triage live-reloads. Broken YAML triggers a modal alert with a plain-text error log."
+    "answerHtml": "Rules live in <code>~/.config/triage/config.yaml</code> as a list of objects with optional <code>host</code>, <code>path</code>, <code>source_app</code>, and <code>cwd</code> matchers plus a target <code>browser</code>. Save the file and Triage live-reloads. Broken YAML triggers a modal alert with a plain-text error log."
   },
   {
     "id": "can-triage-match-links-by-the-source-app-like-slack-or-whats",
@@ -42,7 +42,7 @@
   {
     "id": "can-triage-route-urls-by-terminal-directory",
     "question": "Can Triage route URLs by terminal directory?",
-    "answerHtml": "Yes. Rules can include a <code>cwd</code> matcher (a path glob like <code>~/work/*</code>) that fires for URLs opened from the terminal — <code>open</code>, <code>gh pr view -w</code>, anything that shells out through <code>/usr/bin/open</code>. Triage reads the originating process's current working directory at routing time, with symlinks resolved on both sides. A rule with <code>cwd</code> only matches terminal-launched URLs; clicks from other apps (Slack, Mail, …) fall through to your other rules."
+    "answerHtml": "Yes. Rules can include a <code>cwd</code> matcher (a path glob like <code>~/work/*</code>) that fires for URLs opened from the terminal — <code>open</code>, <code>gh pr view -w</code>, anything that shells out through <code>/usr/bin/open</code>. Dev-server auto-opens count too: <code>npm run dev</code> in a work checkout (Vite, Next, CRA, …) will route <code>http://localhost:3000/</code> by that checkout's cwd. Built-in loopback hosts cover <code>localhost</code>, <code>127.0.0.1</code>, <code>::1</code>, and anything ending in <code>.local</code>, <code>.localhost</code>, or <code>.test</code>; for bare <code>/etc/hosts</code> aliases like <code>my-test-app</code>, add them to <code>loopback_aliases</code> at the top of the config. Symlinks are resolved on both sides. A rule with <code>cwd</code> only matches when an originating cwd can be resolved; clicks from other apps (Slack, Mail, …) fall through to your other rules."
   },
   {
     "id": "what-happens-to-a-link-that-doesn-t-match-any-rule",
