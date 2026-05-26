@@ -71,6 +71,18 @@ const yamlSnippet = `rules:
           <code class="font-mono">open</code>, <code class="font-mono">gh</code>,
           <code class="font-mono">git web--browse</code>, npm scripts, your own aliases.
         </p>
+
+        <p class="mt-3 text-sm text-[color:var(--color-fg-mute)]">
+          Dev-server auto-opens count too:
+          <code class="font-mono">npm run dev</code> from
+          <code class="font-mono">~/work/foo</code> opens
+          <code class="font-mono">http://localhost:3000/</code> in your work browser.
+          <code class="font-mono">.local</code>, <code class="font-mono">.localhost</code>,
+          and <code class="font-mono">.test</code> hostnames are recognised automatically;
+          for bare <code class="font-mono">/etc/hosts</code> aliases, set
+          <code class="font-mono text-[color:var(--color-accent)]">loopback_aliases</code>
+          in your config.
+        </p>
       </div>
 
       <div>

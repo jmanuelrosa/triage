@@ -8,7 +8,7 @@ No picker. No dock icon. No Node runtime. ~500 lines of Swift, single-digit MB o
 
 ## 🌟 Highlights
 
-- **Rule-based, never asks.** Routes by URL host, path, and source app — first-match-wins. You write the rules once; Triage just obeys.
+- **Rule-based, never asks.** Routes by URL host, path, source app, or terminal cwd — first-match-wins. You write the rules once; Triage just obeys.
 - **First-class Chrome profile support.** Use friendly names in YAML (`"Work [Dev]"`); Triage resolves them to Chrome's directory names (`Profile 4`) by reading Chrome's own `Local State`.
 - **Native, lightweight, invisible.** Pure Swift, no Node/Electron. Status-bar item only — no dock icon, no main window. Sleeping process at rest.
 - **Live config reload.** Edit `~/.config/triage/config.yaml`; Triage picks up the change on save. Broken YAML pops a modal alert and writes a plain-text log so you know.
@@ -74,15 +74,21 @@ rules:
   # Anything Slack opens, regardless of URL, goes to the work browser
   - source_app: Slack
     browser: work_general
+
+  # Anything opened from a work checkout (terminal commands, `npm run dev`,
+  # `gh pr view -w`, …) goes to the work browser.
+  - cwd: "~/Developer/work/*"
+    browser: work_dev
 ```
 
 Match rules:
 
 - First matching rule wins, top-down.
-- `host`, `path`, `source_app` are all optional. Missing field = match anything.
+- `host`, `path`, `source_app`, and `cwd` are all optional. Missing field = match anything.
 - `host` and `path` support `*` glob (case-insensitive, anchored both ends).
 - `source_app` matches against either the bundle ID (`com.tinyspeck.slackmacgap`) or the app's display name (`Slack`).
-- A rule with no `host`/`path`/`source_app` is a valid catch-all.
+- `cwd` matches the working directory the URL was opened from. Works for terminal commands (`open <url>`, `gh pr view -w`, …) and for dev-server auto-opens of loopback URLs (`npm run dev` → `http://localhost:3000/`). Recognised as loopback: `localhost`, `127.0.0.1`, `::1`, plus anything ending in `.local`, `.localhost`, or `.test`. For bare `/etc/hosts` aliases like `my-test-app`, add them to the optional `loopback_aliases:` field at the top of the config — see [`config.example.yaml`](./config.example.yaml).
+- A rule with no `host`/`path`/`source_app`/`cwd` is a valid catch-all.
 
 A live, fuller example with Chrome multi-profile is at [`config.example.yaml`](./config.example.yaml).
 
@@ -202,7 +208,6 @@ Beta. The author daily-drives it on macOS 26 (Apple Silicon). Specifically:
 - ✅ No dock icon, no flash on launch.
 - ⚠️ No code-signed/notarized release — you build from source. Gatekeeper will warn the first time.
 - ⚠️ No auto-update.
-- ⚠️ The `open <url>` from Terminal edge case (where the sender PID is `/usr/bin/open` and is gone before we can resolve it) still falls through to the fallback browser instead of using the originating shell.
 
 If you're using it and hit something rough, please file an issue.
 
