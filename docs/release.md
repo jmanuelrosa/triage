@@ -1,6 +1,6 @@
 # Release checklist
 
-Tag-driven release pipeline. Pushing a `v*` tag triggers `.github/workflows/release.yml`, which builds a universal `Triage.app`, packages it as a ZIP and DMG, and attaches both to a GitHub Release. Updating the Homebrew tap is the only step the workflow doesn't automate yet.
+Tag-driven release pipeline. Pushing a `v*` tag triggers `.github/workflows/release.yml`, which builds a universal `Triage.app`, packages it as a ZIP and DMG, attaches both to a GitHub Release, and bumps the Homebrew cask in `jmanuelrosa/homebrew-tap` so `brew upgrade --cask triage` picks up the new version without further action. The cask bump is skipped on pre-releases (`-beta`/`-rc`/`-alpha`) — those are surfaced as GitHub pre-releases but don't change what `brew upgrade` resolves to.
 
 ## Tap repo
 
@@ -42,7 +42,13 @@ The cask for Triage is `homebrew-tap/Casks/triage.rb`. To add a future app, copy
    - `Triage-0.1.1.dmg` (used by users who download by hand)
    - `SHA256SUMS.txt`
 
-4. **Update the Homebrew cask.**
+4. **Homebrew cask — automated.**
+
+   The release workflow's final step bumps `Casks/triage.rb` in `jmanuelrosa/homebrew-tap` automatically. Look for `triage: bump to v<ver>` on [the tap's commit history](https://github.com/jmanuelrosa/homebrew-tap/commits/main) within ~30 seconds of the release workflow finishing.
+
+   Requires the `HOMEBREW_TAP_TOKEN` repo secret (fine-grained PAT scoped to `jmanuelrosa/homebrew-tap` with `Contents: Read and write`). If the secret is missing or expired, the workflow's "Update Homebrew cask" step fails loud — the GitHub Release is still published, and you can fall back to the manual steps below until the token is renewed.
+
+   **Manual fallback (only if the automation fails):**
 
    Read the SHA from the release:
 

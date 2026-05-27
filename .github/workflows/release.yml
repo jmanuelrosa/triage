@@ -101,3 +101,47 @@ jobs:
             > **Beta — unsigned build.** Gatekeeper will warn the first time you launch the app. The Homebrew Cask and `install.sh` paths strip the quarantine attribute automatically; if you use the DMG directly, right-click the app and choose *Open* the first time.
 
             See `SHA256SUMS.txt` for artifact hashes.
+
+      # Bumps jmanuelrosa/homebrew-tap's Casks/triage.rb so `brew upgrade --cask
+      # triage` picks up this version without a manual edit. Skipped on
+      # pre-releases (-beta/-rc/-alpha) since the cask has a single version
+      # field and we don't want to push every brew user onto a beta.
+      - name: Update Homebrew cask
+        if: ${{ !contains(env.VERSION, '-beta') && !contains(env.VERSION, '-rc') && !contains(env.VERSION, '-alpha') }}
+        env:
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          # 1. Pull the ZIP SHA out of SHA256SUMS.txt (format: "<sha>  Triage-X.Y.Z.zip").
+          zip_sha=$(grep "Triage-${VERSION}.zip" SHA256SUMS.txt | awk '{print $1}')
+          if [ -z "$zip_sha" ]; then
+            echo "::error ::Could not find ZIP SHA in SHA256SUMS.txt"
+            exit 1
+          fi
+
+          # 2. Clone the tap over HTTPS with the token in the URL. Shallow clone
+          #    is fine — we only need to rewrite one file on the tip.
+          git clone --depth 1 \
+            "https://x-access-token:${HOMEBREW_TAP_TOKEN}@github.com/jmanuelrosa/homebrew-tap.git" \
+            tap
+          cd tap
+
+          # 3. Rewrite version + sha256 in Casks/triage.rb. The rest of the file
+          #    is templated by `version`, so no other edits needed.
+          sed -i.bak -E "s/^  version \".*\"$/  version \"${VERSION}\"/" Casks/triage.rb
+          sed -i.bak -E "s/^  sha256 \".*\"$/  sha256 \"${zip_sha}\"/" Casks/triage.rb
+          rm Casks/triage.rb.bak
+
+          # 4. Commit + push as the bot. Idempotent: if the file already matches
+          #    (e.g. workflow_dispatch re-run of the same tag), exit cleanly
+          #    rather than failing on "nothing to commit."
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Casks/triage.rb
+          if git diff --staged --quiet; then
+            echo "::notice ::Cask already at v${VERSION} with sha ${zip_sha}; nothing to commit."
+            exit 0
+          fi
+          git commit -m "triage: bump to v${VERSION}"
+          git push origin main
