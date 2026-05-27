@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Status-bar menu shows the running version as a disabled header at the top (e.g. `Triage 0.3.1`). Reads `CFBundleShortVersionString` from `Info.plist` at menu-build time, so the label tracks whatever bundle is actually running. Rendered in the small system font so the row reads as metadata rather than a peer of the action items below.
+
+## [0.3.0] — 2026-05-27
+
+### Added
 - `loopback_aliases` config field: list of hostnames to treat as loopback for the cwd-port resolver, in addition to the built-in matches. Use this for `/etc/hosts` entries and bare company-internal dev names like `my-test-app`. The cwd-port lookup also now recognises the conventional dev TLDs `.local` (mDNS / Bonjour), `.localhost` (RFC 6761), and `.test` (Laravel Valet / Herd / RFC 6761) — so `http://app.test:3000/` and similar route by cwd without any extra config.
 
 ### Fixed
