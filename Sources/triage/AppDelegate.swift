@@ -132,9 +132,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Header: read CFBundleShortVersionString from Info.plist so this stays
         // in sync with Scripts/release.sh's plist bump (no hardcoded version).
         // Falls back to just "Triage" if the key is missing rather than crashing.
+        // Rendered at the small system font size to visually demote it from the
+        // action items below.
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String
         let versionTitle = version.map { "Triage \($0)" } ?? "Triage"
         let versionItem = NSMenuItem(title: versionTitle, action: nil, keyEquivalent: "")
+        versionItem.attributedTitle = NSAttributedString(
+            string: versionTitle,
+            attributes: [.font: NSFont.menuFont(ofSize: NSFont.smallSystemFontSize)]
+        )
         versionItem.isEnabled = false
         menu.addItem(versionItem)
         menu.addItem(.separator())
