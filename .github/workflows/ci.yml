@@ -26,7 +26,7 @@ jobs:
       app: ${{ steps.filter.outputs.app }}
       web: ${{ steps.filter.outputs.web }}
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: dorny/paths-filter@v4
         id: filter
@@ -49,7 +49,7 @@ jobs:
     if: needs.changes.outputs.app == 'true' || github.event_name == 'workflow_dispatch'
     runs-on: macos-26
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - name: Show toolchain
         run: |
@@ -92,7 +92,7 @@ jobs:
     if: needs.changes.outputs.web == 'true' || github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       # Astro 6 requires Node 22+. The Ubuntu runner ships Node 20 by default,
       # and `astro check` / `astro build` execute under Node (not bun), even
@@ -131,7 +131,7 @@ jobs:
       pull-requests: read
       checks: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 

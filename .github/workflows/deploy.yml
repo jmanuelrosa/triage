@@ -34,7 +34,7 @@ jobs:
     environment: production
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       # Astro 6 requires Node 22+. The Ubuntu runner ships Node 20 by default,
       # and `astro build` executes under Node (not bun), even though bun is
