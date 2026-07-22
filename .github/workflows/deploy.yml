@@ -41,7 +41,7 @@ jobs:
       # the package manager. Pin Node explicitly so the toolchain matches
       # local dev and the CI web-check job.
       - name: Setup Node
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: '24.13'
 
