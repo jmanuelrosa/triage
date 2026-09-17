@@ -6,12 +6,17 @@ import OSLog
 private let log = Logger(subsystem: "com.jmrosamoncayo.triage", category: "app")
 
 final class AppDelegate: NSObject, NSApplicationDelegate {
-    private let urlHandler = URLHandler()
+    private lazy var urlHandler = URLHandler { [weak self] error in
+        DispatchQueue.main.async {
+            self?.notifyChromeProfileResolutionFailure(error)
+        }
+    }
     private var statusItem: NSStatusItem?
     private var configWatcher: ConfigWatcher?
     private var firstRunResult: FirstRunSetup.CaptureResult = .alreadyHadState
     private var defaultBrowserItem: NSMenuItem?
     private var loginItem: NSMenuItem?
+    private var hasShownChromeProfileResolutionAlert = false
 
     // Register here, NOT in applicationDidFinishLaunching: when macOS cold-launches
     // us in response to a URL click, the kAEGetURL event is delivered between
@@ -61,6 +66,51 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             \(displayName) as the silent fallback for URLs that match no rule.
 
             Change it any time via the menu bar → Set Fallback Browser.
+            """
+        )
+    }
+
+    private func notifyChromeProfileResolutionFailure(_ error: Error) {
+        guard !hasShownChromeProfileResolutionAlert else { return }
+        hasShownChromeProfileResolutionAlert = true
+
+        if let profileError = error as? ChromeProfileError {
+            switch profileError {
+            case .readError(let path, let reason):
+                showAlertWithOptionalSettings(
+                    title: "Chrome profile access needed",
+                    message: """
+                    Triage could not read Chrome's profile index at \(path): \(reason)
+
+                    macOS may have blocked Application Data access. Triage uses only profile names and directory identifiers from this file. It does not access browsing history, cookies, passwords, or page content.
+
+                    Allow access in System Settings → Privacy & Security → Files & Folders (called Files & Settings on some macOS versions), then retry the link. You can avoid this permission by using an internal profile directory such as Default or Profile 4 in your config.
+                    """,
+                    settingsURL: "x-apple.systempreferences:com.apple.settings.PrivacySecurity.extension?Privacy_FilesAndFolders",
+                    settingsButton: "Open Privacy Settings"
+                )
+                return
+            case .profileNotFound(let name):
+                showAlert(
+                    title: "Chrome profile not found",
+                    message: """
+                    Triage could not find a Chrome profile named \(name).
+
+                    Check the profile name in Chrome, then retry the link. You can also use an internal profile directory such as Default or Profile 4 in your config. The link was still sent to Chrome, but it may open in the wrong profile.
+                    """
+                )
+                return
+            case .parseError:
+                break
+            }
+        }
+
+        showAlert(
+            title: "Couldn't resolve Chrome profile",
+            message: """
+            Triage could not read Chrome's profile index: \(error)
+
+            Retry the link or use an internal profile directory such as Default or Profile 4 in your config. Until this is fixed, links may open in the wrong Chrome profile.
             """
         )
     }

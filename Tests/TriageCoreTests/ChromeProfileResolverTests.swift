@@ -38,9 +38,9 @@ struct ChromeProfileResolverTests {
         }
         """
         let resolver = try ChromeProfileResolver.parse(localStateJSON: json)
-        #expect(resolver.directoryName(for: "Jose Manuel [Dev]") == "Profile 4")
-        #expect(resolver.directoryName(for: "3bitslost") == "Profile 8")
-        #expect(resolver.directoryName(for: "Donde la locura") == "Profile 5")
+        #expect(try resolver.directoryName(forFriendlyName: "Jose Manuel [Dev]") == "Profile 4")
+        #expect(try resolver.directoryName(forFriendlyName: "3bitslost") == "Profile 8")
+        #expect(try resolver.directoryName(forFriendlyName: "Donde la locura") == "Profile 5")
     }
 
     @Test func parse_extraFieldsInJSON_areIgnored() throws {
@@ -78,6 +78,21 @@ struct ChromeProfileResolverTests {
         #expect(resolver.directoryName(for: "anything else") == "anything else")
     }
 
+    @Test func lookup_missingFriendlyName_throwsProfileNotFound() throws {
+        let resolver = try ChromeProfileResolver.parse(localStateJSON: """
+        { "profile": { "info_cache": { "Default": { "name": "Personal" } } } }
+        """)
+
+        do {
+            _ = try resolver.directoryName(forFriendlyName: "Work")
+            Issue.record("Expected a missing profile error")
+        } catch let error as ChromeProfileError {
+            #expect(error == .profileNotFound("Work"))
+        } catch {
+            Issue.record("Expected ChromeProfileError, got \(error)")
+        }
+    }
+
     @Test func lookup_passthroughForLiteralDirectoryName() throws {
         let resolver = try ChromeProfileResolver.parse(localStateJSON: """
         {
@@ -92,6 +107,13 @@ struct ChromeProfileResolverTests {
         // User can specify "Profile 4" directly even though "Profile 4" isn't a display name.
         #expect(resolver.directoryName(for: "Profile 4") == "Profile 4")
         #expect(resolver.directoryName(for: "Default") == "Default")
+    }
+
+    @Test func localStateLookup_isOnlyRequiredForFriendlyProfileNames() {
+        #expect(!ChromeProfileResolver.requiresLocalStateLookup(for: ""))
+        #expect(!ChromeProfileResolver.requiresLocalStateLookup(for: "Default"))
+        #expect(!ChromeProfileResolver.requiresLocalStateLookup(for: "Profile 4"))
+        #expect(ChromeProfileResolver.requiresLocalStateLookup(for: "Work [Dev]"))
     }
 
     // MARK: - Duplicates
@@ -164,10 +186,21 @@ struct ChromeProfileResolverTests {
         #expect(resolver.directoryName(for: "Jose Manuel") == "Default")
     }
 
-    @Test func load_missingFile_throws() {
+    @Test func load_missingFile_throwsReadErrorWithPath() throws {
         let bogusURL = URL(fileURLWithPath: "/nonexistent/\(UUID().uuidString).json")
-        #expect(throws: ChromeProfileError.self) {
-            try ChromeProfileResolver.load(from: bogusURL)
+        let thrownError: Error?
+        do {
+            _ = try ChromeProfileResolver.load(from: bogusURL)
+            thrownError = nil
+        } catch {
+            thrownError = error
         }
+
+        let profileError = try #require(thrownError as? ChromeProfileError)
+        guard case .readError(let path, _) = profileError else {
+            Issue.record("Expected a read error, got \(profileError)")
+            return
+        }
+        #expect(path == bogusURL.path)
     }
 }

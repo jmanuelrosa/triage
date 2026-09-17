@@ -27,8 +27,11 @@ single feature that uniquely identifies Triage among macOS browser routers.
 
 - Rule-based routing by URL host, path, source app, and cwd. First match wins.
 - First-class Chrome profile resolution: reference profiles by friendly
-  display name in YAML (e.g. `"Work [Dev]"`); Triage resolves them to
-  Chrome's internal directory names by reading Chrome's Local State file.
+  display name in YAML (e.g. `"Work [Dev]"`). This may require Application
+  Data access so Triage can read Chrome's local profile index. It uses profile
+  display names and directory identifiers only, not browsing history, cookies,
+  passwords, or page content. Use `Default` or `Profile 4` to avoid the
+  permission.
 - Live config reload from `~/.config/triage/config.yaml`; broken YAML pops
   a modal alert.
 - Silent fallback to the previous default browser, captured automatically.

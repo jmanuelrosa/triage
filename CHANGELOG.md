@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Status-bar menu shows the running version as a disabled header at the top (e.g. `Triage 0.3.1`). Reads `CFBundleShortVersionString` from `Info.plist` at menu-build time, so the label tracks whatever bundle is actually running. Rendered in the small system font so the row reads as metadata rather than a peer of the action items below.
 
+### Changed
+- Chrome's profile index is read only when a matched browser uses a friendly profile name. Internal names such as `Default` and `Profile 4` no longer request Application Data access. If macOS blocks access, Triage explains what it reads, links to Privacy settings, and documents how to avoid the permission.
+
 ## [0.3.0] — 2026-05-27
 
 ### Added
