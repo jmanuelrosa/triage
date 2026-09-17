@@ -21,21 +21,41 @@ public struct ChromeProfileResolver: Equatable {
 
     public static let empty = ChromeProfileResolver()
 
+    /// Chrome's built-in profile directory names do not need a Local State lookup.
+    public static func requiresLocalStateLookup(for profile: String) -> Bool {
+        guard !profile.isEmpty, profile != "Default" else { return false }
+        guard profile.hasPrefix("Profile ") else { return true }
+        return Int(profile.dropFirst("Profile ".count)) == nil
+    }
+
     /// Resolve a YAML `profile:` value to a `--profile-directory` argument.
     /// Lookup precedence: exact display name → literal passthrough.
     /// The passthrough lets users specify `"Profile 4"` or `"Default"` directly.
     public func directoryName(for input: String) -> String {
         nameToDirectory[input] ?? input
     }
+
+    public func directoryName(forFriendlyName input: String) throws -> String {
+        guard let directory = nameToDirectory[input] else {
+            throw ChromeProfileError.profileNotFound(input)
+        }
+        return directory
+    }
 }
 
 public enum ChromeProfileError: Error, Equatable, CustomStringConvertible {
+    case readError(path: String, reason: String)
     case parseError(String)
+    case profileNotFound(String)
 
     public var description: String {
         switch self {
+        case .readError(let path, let reason):
+            return "could not read \(path): \(reason)"
         case .parseError(let message):
             return "Chrome Local State parse error: \(message)"
+        case .profileNotFound(let name):
+            return "Chrome profile named \"\(name)\" was not found"
         }
     }
 }
@@ -79,8 +99,9 @@ public extension ChromeProfileResolver {
         do {
             data = try Data(contentsOf: url)
         } catch {
-            throw ChromeProfileError.parseError(
-                "could not read \(url.path): \(error.localizedDescription)"
+            throw ChromeProfileError.readError(
+                path: url.path,
+                reason: error.localizedDescription
             )
         }
         guard let json = String(data: data, encoding: .utf8) else {

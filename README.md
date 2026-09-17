@@ -9,7 +9,7 @@ No picker. No dock icon. No Node runtime. ~500 lines of Swift, single-digit MB o
 ## 🌟 Highlights
 
 - **Rule-based, never asks.** Routes by URL host, path, source app, or terminal cwd — first-match-wins. You write the rules once; Triage just obeys.
-- **First-class Chrome profile support.** Use friendly names in YAML (`"Work [Dev]"`); Triage resolves them to Chrome's directory names (`Profile 4`) by reading Chrome's own `Local State`.
+- **First-class Chrome profile support.** Use friendly names in YAML (`"Work [Dev]"`), or internal names such as `Profile 4` if you do not want to grant Application Data access.
 - **Native, lightweight, invisible.** Pure Swift, no Node/Electron. Status-bar item only — no dock icon, no main window. Sleeping process at rest.
 - **Live config reload.** Edit `~/.config/triage/config.yaml`; Triage picks up the change on save. Broken YAML pops a modal alert and writes a plain-text log so you know.
 - **Source-app aware.** Match by the app the link came from (`Slack`, `WhatsApp`, …) — useful for "every work-Slack link goes to the work browser, regardless of URL."
@@ -89,6 +89,14 @@ Match rules:
 - `source_app` matches against either the bundle ID (`com.tinyspeck.slackmacgap`) or the app's display name (`Slack`).
 - `cwd` matches the working directory the URL was opened from. Works for terminal commands (`open <url>`, `gh pr view -w`, …) and for dev-server auto-opens of loopback URLs (`npm run dev` → `http://localhost:3000/`). Recognised as loopback: `localhost`, `127.0.0.1`, `::1`, plus anything ending in `.local`, `.localhost`, or `.test`. For bare `/etc/hosts` aliases like `my-test-app`, add them to the optional `loopback_aliases:` field at the top of the config — see [`config.example.yaml`](./config.example.yaml).
 - A rule with no `host`/`path`/`source_app`/`cwd` is a valid catch-all.
+
+### Chrome profile access
+
+Friendly Chrome profile names require Triage to read Chrome's local profile index at `~/Library/Application Support/Google/Chrome/Local State`.
+macOS may ask you to allow Triage access to Application Data.
+Triage uses only profile display names and directory identifiers, not browsing history, cookies, passwords, or page content.
+Allow it in *System Settings → Privacy & Security → Files & Folders* or *Files & Settings*.
+If you prefer not to grant access, set `profile:` to Chrome's internal directory name, such as `Default` or `Profile 4`.
 
 A live, fuller example with Chrome multi-profile is at [`config.example.yaml`](./config.example.yaml).
 

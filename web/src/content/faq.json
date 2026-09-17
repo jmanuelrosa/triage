@@ -22,7 +22,7 @@
   {
     "id": "can-triage-route-links-to-different-chrome-profiles",
     "question": "Can Triage route links to different Chrome profiles?",
-    "answerHtml": "Yes — Chrome profile routing is first-class. You reference profiles by their friendly display name in YAML (for example <code>\"Work [Dev]\"</code>) and Triage resolves them to Chrome's internal directory names by reading Chrome's <code>Local State</code> file."
+    "answerHtml": "Yes. You can reference profiles by their friendly display name in YAML, for example <code>\"Work [Dev]\"</code>. Triage resolves those names from Chrome's local profile index. macOS may ask you to allow Triage access to Application Data for this. Triage uses only profile display names and directory identifiers, not browsing history, cookies, passwords, or page content. You can avoid the permission by using an internal directory name such as <code>Default</code> or <code>Profile 4</code>."
   },
   {
     "id": "does-triage-ever-ask-which-browser-to-use",

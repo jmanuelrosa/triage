@@ -34,6 +34,9 @@
 browsers:
   helium:
     bundle_id: net.imput.helium                # work / Acme
+  # Friendly Chrome profile names require Application Data access so Triage can
+  # read Chrome's Local State profile index. Use Default or Profile N instead
+  # if you do not want to grant access.
   chrome_personal:
     bundle_id: com.google.Chrome
     profile: "Jose Manuel"                     # → Default

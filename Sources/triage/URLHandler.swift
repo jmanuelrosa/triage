@@ -21,19 +21,22 @@ struct URLHandler {
     let chromeLocalStateURL: URL
     let ownBundleID: String
     let cwdResolver: CwdResolving
+    let profileResolutionFailure: (Error) -> Void
 
     init(
         configURL: URL = Config.defaultURL,
         stateURL: URL = State.defaultURL,
         chromeLocalStateURL: URL = ChromeProfileResolver.defaultLocalStateURL,
         ownBundleID: String = Bundle.main.bundleIdentifier ?? "com.jmrosamoncayo.triage",
-        cwdResolver: CwdResolving = SystemCwdResolver()
+        cwdResolver: CwdResolving = SystemCwdResolver(),
+        profileResolutionFailure: @escaping (Error) -> Void = { _ in }
     ) {
         self.configURL = configURL
         self.stateURL = stateURL
         self.chromeLocalStateURL = chromeLocalStateURL
         self.ownBundleID = ownBundleID
         self.cwdResolver = cwdResolver
+        self.profileResolutionFailure = profileResolutionFailure
     }
 
     func handle(url rawURL: String, senderPID: pid_t) {
@@ -59,8 +62,6 @@ struct URLHandler {
           cwd=\(resolvedCwd ?? "?", privacy: .public) cwd-source=\(cwdSource, privacy: .public)
         """)
 
-        let chromeResolver = loadChromeResolverOrEmpty()
-
         let context = MatchContext(
             host: parsed.host,
             path: parsed.path.isEmpty ? "/" : parsed.path,
@@ -80,6 +81,7 @@ struct URLHandler {
             browser = Browser(bundleID: Self.ultimateFallbackBundleID)
         }
 
+        let chromeResolver = loadChromeResolverOrEmpty(for: browser)
         launch(browser: browser, url: rawURL, chromeResolver: chromeResolver)
     }
 
@@ -121,11 +123,20 @@ struct URLHandler {
         }
     }
 
-    private func loadChromeResolverOrEmpty() -> ChromeProfileResolver {
+    private func loadChromeResolverOrEmpty(for browser: Browser) -> ChromeProfileResolver {
+        guard let profile = browser.profile,
+              ChromeProfileResolver.requiresLocalStateLookup(for: profile)
+        else { return .empty }
+
         do {
-            return try ChromeProfileResolver.load(from: chromeLocalStateURL)
+            let resolver = try ChromeProfileResolver.load(from: chromeLocalStateURL)
+            _ = try resolver.directoryName(forFriendlyName: profile)
+            return resolver
         } catch {
-            // Quietly fall back; Chrome may not be installed at all.
+            let description = String(describing: error)
+            log.error("Chrome profile resolution failed: \(description, privacy: .public)")
+            FileLog.error("Chrome profile resolution failed: \(description)")
+            profileResolutionFailure(error)
             return .empty
         }
     }
